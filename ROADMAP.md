@@ -1,5 +1,19 @@
 # RAZER RESEARCH - Liquidity Arena 2026 Progress
 
+```mermaid
+flowchart LR
+    A[Setup<br/>Done] --> B[REST API<br/>Done]
+    B --> C[Market data<br/>Done]
+    C --> D[Orders<br/>Up next]
+    D --> E[Go live<br/>Jul 20]
+
+    style A fill:#9FE1CB,stroke:#0F6E56,color:#04342C
+    style B fill:#9FE1CB,stroke:#0F6E56,color:#04342C
+    style C fill:#9FE1CB,stroke:#0F6E56,color:#04342C
+    style D fill:#FAC775,stroke:#854F0B,color:#412402
+    style E fill:#D3D1C7,stroke:#5F5E5A,color:#2C2C2A
+```
+
 ## Competition Key Facts
 - Track A - Logic Frontier, Phase 1: July 20 - Aug 21, 2026
 - Sandbox API host: https://api.ltp-contest.com (NOT the documented production api.liquiditytech.com)

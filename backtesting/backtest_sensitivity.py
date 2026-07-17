@@ -7,12 +7,19 @@ No live API calls — historical replay only.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import itertools
 import math
 import sys
 from dataclasses import dataclass
 
-from backtest_mean_reversion import (
+from backtesting.backtest_mean_reversion import (
     STARTING_CAPITAL,
     combine_equity,
     load_candles,

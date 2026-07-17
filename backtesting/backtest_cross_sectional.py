@@ -8,13 +8,20 @@ Tune on Period A; validate top-3 on Period B and C.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import itertools
 import math
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from backtest_mean_reversion import (
+from backtesting.backtest_mean_reversion import (
     STARTING_CAPITAL,
     Candle,
     load_candles,

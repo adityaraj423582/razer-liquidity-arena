@@ -1,0 +1,192 @@
+=== MULTI-STRATEGY WALK-FORWARD SWEEP ===
+Pass bar: positive return AND positive Sharpe on BOTH Period B and Period C (independent; not averaged; return alone is not enough).
+Tune/select reference: Period A Sharpe only (no peeking at B/C for params).
+
+MECHANISM NOTE — funding CARRY vs prior funding DIRECTIONAL:
+  Prior (rejected): long-only when funding is extremely negative; bet on price
+  bounce; funding cashflows NOT in PnL; exits via price TP/SL / normalize / time.
+  This carry sleeve: short extreme positive / long extreme negative funding to
+  COLLECT the premium; funding accruals ARE in PnL; exit on normalize or time.
+  These are economically opposite uses of the same input series.
+
+Universe (50): BTCUSDT, ETHUSDT, SOLUSDT, HYPEUSDT, AKEUSDT, ZECUSDT, XRPUSDT, ESPORTSUSDT, ONDOUSDT, DOGEUSDT, BNBUSDT, USUSDT, NEARUSDT, BANKUSDT, 1000PEPEUSDT, LABUSDT, WLDUSDT, SUIUSDT, ADAUSDT, PUMPUSDT, DEXEUSDT, ENAUSDT, LINKUSDT, HOMEUSDT, XLMUSDT, TAOUSDT, AAVEUSDT, PAXGUSDT, BCHUSDT, UNIUSDT, BLUAIUSDT, EVAAUSDT, FLOCKUSDT, AVAXUSDT, 1000BONKUSDT, LITUSDT, LTCUSDT, RAVEUSDT, DOTUSDT, DODOXUSDT, LDOUSDT, ALLOUSDT, TACUSDT, ARBUSDT, INJUSDT, LUMIAUSDT, FILUSDT, TIAUSDT, 1000XECUSDT, OPUSDT
+Saved: C:\Users\Aditya Raj Singh\OneDrive\Desktop\LIQUITY TRADINGH\competition_universe.json
+
+Period A: 2026-01-18T06:00:00+00:00 -> 2026-03-19T06:00:00+00:00 (~1440 hourly bars on BTCUSDT)
+Period B: 2026-03-19T06:00:00+00:00 -> 2026-05-18T06:00:00+00:00 (~1440 hourly bars on BTCUSDT)
+Period C: 2026-05-18T06:00:00+00:00 -> 2026-07-16T16:00:00+00:00 (~1426 hourly bars on BTCUSDT)
+
+--- Family 1: cascade+funding (4 combos, fixed detect) ---
+FAIL | cascade+fund | cascade+fund retr=40% t=8h                              | A: sharpe= -2.58 ret=  -0.65% trades= 115 dd=  0.80% | B: sharpe= -3.34 ret=  -1.04% trades=  86 dd=  1.27% | C: sharpe=-10.92 ret=  -4.01% trades= 169 dd=  4.01%
+FAIL | cascade+fund | cascade+fund retr=40% t=24h                             | A: sharpe= -2.27 ret=  -0.62% trades= 115 dd=  0.80% | B: sharpe= -3.41 ret=  -1.06% trades=  86 dd=  1.27% | C: sharpe=-11.16 ret=  -4.12% trades= 169 dd=  4.12%
+FAIL | cascade+fund | cascade+fund retr=60% t=8h                              | A: sharpe= -0.76 ret=  -0.19% trades= 113 dd=  0.78% | B: sharpe= -0.69 ret=  -0.29% trades=  86 dd=  0.76% | C: sharpe= -4.06 ret=  -1.93% trades= 169 dd=  2.13%
+FAIL | cascade+fund | cascade+fund retr=60% t=24h                             | A: sharpe= -0.28 ret=  -0.08% trades= 113 dd=  0.78% | B: sharpe=  0.03 ret=  +0.01% trades=  86 dd=  0.76% | C: sharpe= -4.25 ret=  -2.03% trades= 169 dd=  2.16%
+
+--- Family 2: funding-rate CARRY (18 combos) ---
+FAIL | fund_carry   | carry short>=80pctl long<=5pctl t=24h                   | A: sharpe=  4.72 ret=  +3.97% trades=2365 dd= 88.61% | B: sharpe=  5.24 ret= -15.91% trades=2404 dd= 87.11% | C: sharpe=  4.30 ret=  +5.84% trades=2312 dd= 79.21%
+FAIL | fund_carry   | carry short>=80pctl long<=5pctl t=72h                   | A: sharpe=  4.23 ret= +11.77% trades=1562 dd= 91.70% | B: sharpe=  4.77 ret= -17.55% trades=1649 dd= 88.00% | C: sharpe=  3.66 ret= +13.40% trades=1529 dd= 82.73%
+FAIL | fund_carry   | carry short>=80pctl long<=10pctl t=24h                  | A: sharpe=  4.70 ret=  +5.82% trades=2547 dd= 88.33% | B: sharpe=  5.10 ret= -16.91% trades=2599 dd= 87.75% | C: sharpe=  4.28 ret= +12.05% trades=2509 dd= 77.11%
+FAIL | fund_carry   | carry short>=80pctl long<=10pctl t=72h                  | A: sharpe=  4.04 ret= +13.80% trades=1686 dd= 88.23% | B: sharpe=  4.56 ret= -16.96% trades=1790 dd= 88.42% | C: sharpe=  3.60 ret= +17.00% trades=1660 dd= 81.73%
+FAIL | fund_carry   | carry short>=80pctl long<=20pctl t=24h                  | A: sharpe=  4.45 ret=  +6.63% trades=2917 dd= 86.61% | B: sharpe=  4.95 ret= -16.59% trades=2927 dd= 83.47% | C: sharpe=  4.30 ret= +22.15% trades=2835 dd= 74.59%
+FAIL | fund_carry   | carry short>=80pctl long<=20pctl t=72h                  | A: sharpe=  4.01 ret= +13.66% trades=1958 dd= 85.89% | B: sharpe=  4.48 ret= -16.92% trades=2034 dd= 88.97% | C: sharpe=  3.64 ret= +14.14% trades=1881 dd= 80.67%
+FAIL | fund_carry   | carry short>=90pctl long<=5pctl t=24h                   | A: sharpe=  3.67 ret=  +0.25% trades=2155 dd= 81.61% | B: sharpe=  4.15 ret= -15.43% trades=2222 dd= 85.62% | C: sharpe=  3.65 ret=  +5.67% trades=2092 dd= 80.17%
+FAIL | fund_carry   | carry short>=90pctl long<=5pctl t=72h                   | A: sharpe=  3.37 ret=  +8.22% trades=1406 dd= 86.64% | B: sharpe=  3.92 ret= -17.13% trades=1528 dd= 86.39% | C: sharpe=  3.23 ret= +10.21% trades=1395 dd= 82.20%
+FAIL | fund_carry   | carry short>=90pctl long<=10pctl t=24h                  | A: sharpe=  3.55 ret=  +1.79% trades=2339 dd= 80.74% | B: sharpe=  4.04 ret= -16.24% trades=2421 dd= 86.47% | C: sharpe=  3.67 ret= +12.52% trades=2300 dd= 79.19%
+FAIL | fund_carry   | carry short>=90pctl long<=10pctl t=72h                  | A: sharpe=  3.25 ret= +10.61% trades=1530 dd= 84.12% | B: sharpe=  3.77 ret= -16.74% trades=1671 dd= 87.14% | C: sharpe=  3.21 ret= +13.51% trades=1534 dd= 80.34%
+FAIL | fund_carry   | carry short>=90pctl long<=20pctl t=24h                  | A: sharpe=  3.37 ret=  +2.03% trades=2715 dd= 78.22% | B: sharpe=  3.94 ret= -15.71% trades=2751 dd= 82.83% | C: sharpe=  3.73 ret= +19.59% trades=2630 dd= 77.04%
+FAIL | fund_carry   | carry short>=90pctl long<=20pctl t=72h                  | A: sharpe=  3.10 ret= +11.50% trades=1810 dd= 81.27% | B: sharpe=  3.71 ret= -16.50% trades=1916 dd= 87.66% | C: sharpe=  3.18 ret= +10.86% trades=1757 dd= 78.13%
+FAIL | fund_carry   | carry short>=95pctl long<=5pctl t=24h                   | A: sharpe=  3.15 ret=  -4.72% trades=2063 dd= 80.00% | B: sharpe=  3.73 ret=  -8.53% trades=2165 dd= 81.33% | C: sharpe=  2.88 ret=  -0.42% trades=1989 dd= 70.47%
+FAIL | fund_carry   | carry short>=95pctl long<=5pctl t=72h                   | A: sharpe=  2.78 ret=  +7.83% trades=1357 dd= 81.24% | B: sharpe=  3.52 ret= -13.52% trades=1503 dd= 81.28% | C: sharpe=  2.81 ret= +10.43% trades=1351 dd= 79.03%
+FAIL | fund_carry   | carry short>=95pctl long<=10pctl t=24h                  | A: sharpe=  3.08 ret=  -3.68% trades=2245 dd= 79.64% | B: sharpe=  3.60 ret=  -9.47% trades=2370 dd= 82.13% | C: sharpe=  2.90 ret=  +5.94% trades=2209 dd= 69.18%
+FAIL | fund_carry   | carry short>=95pctl long<=10pctl t=72h                  | A: sharpe=  2.71 ret=  +9.86% trades=1480 dd= 78.09% | B: sharpe=  3.40 ret= -13.48% trades=1647 dd= 82.27% | C: sharpe=  2.80 ret= +13.46% trades=1492 dd= 77.14%
+FAIL | fund_carry   | carry short>=95pctl long<=20pctl t=24h                  | A: sharpe=  2.90 ret=  -2.41% trades=2627 dd= 76.52% | B: sharpe=  3.54 ret=  -9.05% trades=2701 dd= 78.37% | C: sharpe=  2.93 ret=  +8.22% trades=2546 dd= 68.23%
+FAIL | fund_carry   | carry short>=95pctl long<=20pctl t=72h                  | A: sharpe=  2.57 ret=  +9.67% trades=1763 dd= 74.66% | B: sharpe=  3.36 ret= -13.29% trades=1893 dd= 82.87% | C: sharpe=  2.79 ret= +10.54% trades=1724 dd= 74.84%
+
+--- Family 3: low-vol mean reversion (32 combos) ---
+PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.3% stop=-4.0% vol<=20pctl | A: sharpe= -0.79 ret=  -0.53% trades= 287 dd=  2.27% | B: sharpe=  2.57 ret=  +0.72% trades= 111 dd=  0.43% | C: sharpe=  2.00 ret=  +1.20% trades= 317 dd=  1.36%
+FAIL | vol_mr       | volMR sma=10 entry=-2.0% tp=0.3% stop=-4.0% vol<=30pctl | A: sharpe= -0.95 ret=  -0.91% trades= 436 dd=  3.40% | B: sharpe= -0.04 ret=  -0.02% trades= 210 dd=  0.91% | C: sharpe=  0.77 ret=  +0.61% trades= 498 dd=  2.12%
+PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.3% stop=-5.0% vol<=20pctl | A: sharpe= -0.16 ret=  -0.12% trades= 275 dd=  2.09% | B: sharpe=  2.35 ret=  +0.68% trades= 110 dd=  0.45% | C: sharpe=  3.19 ret=  +2.03% trades= 291 dd=  1.14%
+FAIL | vol_mr       | volMR sma=10 entry=-2.0% tp=0.3% stop=-5.0% vol<=30pctl | A: sharpe= -0.43 ret=  -0.45% trades= 415 dd=  3.22% | B: sharpe= -0.12 ret=  -0.05% trades= 195 dd=  0.91% | C: sharpe=  1.89 ret=  +1.62% trades= 449 dd=  2.31%
+PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.5% stop=-4.0% vol<=20pctl | A: sharpe= -1.21 ret=  -0.76% trades= 288 dd=  2.28% | B: sharpe=  2.22 ret=  +0.59% trades= 114 dd=  0.43% | C: sharpe=  1.83 ret=  +1.03% trades= 323 dd=  1.18%
+PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.5% stop=-4.0% vol<=30pctl | A: sharpe= -1.30 ret=  -1.16% trades= 439 dd=  3.28% | B: sharpe=  0.23 ret=  +0.08% trades= 213 dd=  0.68% | C: sharpe=  0.76 ret=  +0.57% trades= 505 dd=  1.94%
+PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.5% stop=-5.0% vol<=20pctl | A: sharpe= -0.67 ret=  -0.46% trades= 276 dd=  2.16% | B: sharpe=  2.02 ret=  +0.55% trades= 113 dd=  0.43% | C: sharpe=  3.06 ret=  +1.86% trades= 297 dd=  0.97%
+PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe= -0.80 ret=  -0.78% trades= 418 dd=  3.10% | B: sharpe=  0.30 ret=  +0.11% trades= 198 dd=  0.61% | C: sharpe=  1.93 ret=  +1.59% trades= 456 dd=  2.11%
+PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.3% stop=-4.0% vol<=20pctl | A: sharpe= -0.64 ret=  -0.16% trades=  92 dd=  0.84% | B: sharpe=  0.08 ret=  +0.01% trades=  35 dd=  0.27% | C: sharpe=  4.37 ret=  +1.51% trades= 139 dd=  0.60%
+PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.3% stop=-4.0% vol<=30pctl | A: sharpe= -1.44 ret=  -0.50% trades= 143 dd=  1.25% | B: sharpe=  1.93 ret=  +0.39% trades=  83 dd=  0.43% | C: sharpe=  4.43 ret=  +2.06% trades= 232 dd=  0.65%
+FAIL | vol_mr       | volMR sma=10 entry=-3.0% tp=0.3% stop=-5.0% vol<=20pctl | A: sharpe=  0.31 ret=  +0.09% trades=  83 dd=  0.78% | B: sharpe= -0.59 ret=  -0.09% trades=  34 dd=  0.36% | C: sharpe=  6.02 ret=  +2.28% trades= 120 dd=  0.43%
+PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.3% stop=-5.0% vol<=30pctl | A: sharpe= -0.16 ret=  -0.07% trades= 127 dd=  1.07% | B: sharpe=  0.65 ret=  +0.14% trades=  72 dd=  0.49% | C: sharpe=  5.86 ret=  +3.01% trades= 202 dd=  0.80%
+FAIL | vol_mr       | volMR sma=10 entry=-3.0% tp=0.5% stop=-4.0% vol<=20pctl | A: sharpe= -0.02 ret=  -0.01% trades=  93 dd=  0.85% | B: sharpe= -0.70 ret=  -0.10% trades=  35 dd=  0.37% | C: sharpe=  4.32 ret=  +1.45% trades= 140 dd=  0.60%
+PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.5% stop=-4.0% vol<=30pctl | A: sharpe= -0.56 ret=  -0.19% trades= 144 dd=  1.11% | B: sharpe=  1.56 ret=  +0.31% trades=  83 dd=  0.42% | C: sharpe=  4.29 ret=  +1.93% trades= 233 dd=  0.61%
+FAIL | vol_mr       | volMR sma=10 entry=-3.0% tp=0.5% stop=-5.0% vol<=20pctl | A: sharpe=  0.62 ret=  +0.17% trades=  84 dd=  0.81% | B: sharpe= -1.35 ret=  -0.20% trades=  34 dd=  0.47% | C: sharpe=  6.01 ret=  +2.22% trades= 121 dd=  0.43%
+PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe=  0.36 ret=  +0.14% trades= 128 dd=  1.04% | B: sharpe=  0.21 ret=  +0.04% trades=  72 dd=  0.49% | C: sharpe=  5.75 ret=  +2.88% trades= 203 dd=  0.72%
+PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.3% stop=-4.0% vol<=20pctl | A: sharpe= -4.11 ret=  -4.86% trades= 495 dd=  6.18% | B: sharpe=  1.61 ret=  +0.67% trades= 237 dd=  0.89% | C: sharpe=  4.17 ret=  +3.79% trades= 575 dd=  1.59%
+PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.3% stop=-4.0% vol<=30pctl | A: sharpe= -3.25 ret=  -5.15% trades= 734 dd=  7.05% | B: sharpe=  2.30 ret=  +1.34% trades= 403 dd=  1.09% | C: sharpe=  3.72 ret=  +4.36% trades= 836 dd=  2.30%
+PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.3% stop=-5.0% vol<=20pctl | A: sharpe= -4.05 ret=  -4.98% trades= 425 dd=  6.16% | B: sharpe=  2.06 ret=  +0.87% trades= 199 dd=  0.89% | C: sharpe=  4.44 ret=  +4.29% trades= 475 dd=  1.81%
+PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.3% stop=-5.0% vol<=30pctl | A: sharpe= -3.51 ret=  -5.88% trades= 614 dd=  7.83% | B: sharpe=  3.53 ret=  +2.15% trades= 346 dd=  1.10% | C: sharpe=  4.33 ret=  +5.49% trades= 684 dd=  2.53%
+PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.5% stop=-4.0% vol<=20pctl | A: sharpe= -4.35 ret=  -4.80% trades= 496 dd=  5.88% | B: sharpe=  0.88 ret=  +0.35% trades= 238 dd=  0.92% | C: sharpe=  4.47 ret=  +3.94% trades= 586 dd=  1.60%
+PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.5% stop=-4.0% vol<=30pctl | A: sharpe= -3.30 ret=  -4.99% trades= 744 dd=  6.79% | B: sharpe=  1.53 ret=  +0.84% trades= 404 dd=  1.10% | C: sharpe=  3.82 ret=  +4.34% trades= 851 dd=  2.29%
+PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.5% stop=-5.0% vol<=20pctl | A: sharpe= -4.21 ret=  -4.86% trades= 426 dd=  5.82% | B: sharpe=  1.38 ret=  +0.57% trades= 200 dd=  0.92% | C: sharpe=  4.59 ret=  +4.30% trades= 485 dd=  1.81%
+PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe= -3.52 ret=  -5.65% trades= 624 dd=  7.47% | B: sharpe=  2.84 ret=  +1.65% trades= 347 dd=  1.12% | C: sharpe=  4.35 ret=  +5.34% trades= 698 dd=  2.50%
+PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.3% stop=-4.0% vol<=20pctl | A: sharpe= -1.25 ret=  -0.87% trades= 279 dd=  2.07% | B: sharpe=  1.85 ret=  +0.46% trades= 116 dd=  0.43% | C: sharpe=  4.14 ret=  +2.16% trades= 341 dd=  0.69%
+PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.3% stop=-4.0% vol<=30pctl | A: sharpe= -1.66 ret=  -1.66% trades= 448 dd=  3.56% | B: sharpe=  3.24 ret=  +1.22% trades= 227 dd=  0.56% | C: sharpe=  3.53 ret=  +2.41% trades= 539 dd=  1.13%
+PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.3% stop=-5.0% vol<=20pctl | A: sharpe= -0.65 ret=  -0.50% trades= 223 dd=  1.88% | B: sharpe=  2.73 ret=  +0.71% trades=  85 dd=  0.44% | C: sharpe=  5.00 ret=  +2.95% trades= 264 dd=  0.92%
+PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.3% stop=-5.0% vol<=30pctl | A: sharpe= -1.54 ret=  -1.71% trades= 350 dd=  3.55% | B: sharpe=  3.10 ret=  +1.20% trades= 176 dd=  0.49% | C: sharpe=  5.07 ret=  +4.02% trades= 417 dd=  1.47%
+PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.5% stop=-4.0% vol<=20pctl | A: sharpe= -1.15 ret=  -0.77% trades= 279 dd=  1.99% | B: sharpe=  1.47 ret=  +0.36% trades= 116 dd=  0.43% | C: sharpe=  4.49 ret=  +2.29% trades= 345 dd=  0.70%
+PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.5% stop=-4.0% vol<=30pctl | A: sharpe= -1.71 ret=  -1.66% trades= 448 dd=  3.54% | B: sharpe=  2.62 ret=  +0.96% trades= 227 dd=  0.69% | C: sharpe=  3.53 ret=  +2.38% trades= 544 dd=  1.14%
+PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.5% stop=-5.0% vol<=20pctl | A: sharpe= -0.57 ret=  -0.42% trades= 223 dd=  1.84% | B: sharpe=  2.39 ret=  +0.61% trades=  85 dd=  0.43% | C: sharpe=  5.12 ret=  +2.97% trades= 266 dd=  0.92%
+PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe= -1.48 ret=  -1.60% trades= 351 dd=  3.56% | B: sharpe=  2.47 ret=  +0.94% trades= 176 dd=  0.62% | C: sharpe=  4.85 ret=  +3.80% trades= 420 dd=  1.48%
+
+--- Family 4: cross-symbol funding dispersion (4 combos) ---
+FAIL | fund_disp    | fundDisp K=3 rebalance=8h                               | A: sharpe=  2.49 ret=  +1.16% trades=1080 dd= 18.43% | B: sharpe=  0.61 ret= -71.60% trades=1080 dd= 77.05% | C: sharpe=  2.69 ret=  -4.46% trades=1062 dd= 65.61%
+FAIL | fund_disp    | fundDisp K=3 rebalance=24h                              | A: sharpe=  2.59 ret=  +6.18% trades= 360 dd= 24.22% | B: sharpe=  0.00 ret= -45.59% trades= 360 dd=113.68% | C: sharpe=  2.61 ret= -22.23% trades= 360 dd= 72.78%
+FAIL | fund_disp    | fundDisp K=5 rebalance=8h                               | A: sharpe=  1.09 ret=  -2.69% trades=1790 dd= 55.10% | B: sharpe=  0.63 ret= -62.19% trades=1800 dd= 66.15% | C: sharpe=  1.91 ret= -28.31% trades=1790 dd= 51.63%
+FAIL | fund_disp    | fundDisp K=5 rebalance=24h                              | A: sharpe=  1.22 ret=  +3.37% trades= 590 dd= 54.92% | B: sharpe=  1.63 ret= -52.51% trades= 600 dd= 77.69% | C: sharpe=  2.11 ret= -21.97% trades= 600 dd= 55.90%
+
+
+=== FULL TABLE: 58 strategies tested (all logged above) ===
+Passed bar (return>0 AND Sharpe>0 on B AND C): 27/58
+
+=== RANKED PASSERS (by average B+C Sharpe) ===
+ 1. avgBC_sharpe=4.08 | PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.3% stop=-5.0% vol<=30pctl | A: sharpe= -1.54 ret=  -1.71% trades= 350 dd=  3.55% | B: sharpe=  3.10 ret=  +1.20% trades= 176 dd=  0.49% | C: sharpe=  5.07 ret=  +4.02% trades= 417 dd=  1.47%
+ 2. avgBC_sharpe=3.93 | PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.3% stop=-5.0% vol<=30pctl | A: sharpe= -3.51 ret=  -5.88% trades= 614 dd=  7.83% | B: sharpe=  3.53 ret=  +2.15% trades= 346 dd=  1.10% | C: sharpe=  4.33 ret=  +5.49% trades= 684 dd=  2.53%
+ 3. avgBC_sharpe=3.87 | PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.3% stop=-5.0% vol<=20pctl | A: sharpe= -0.65 ret=  -0.50% trades= 223 dd=  1.88% | B: sharpe=  2.73 ret=  +0.71% trades=  85 dd=  0.44% | C: sharpe=  5.00 ret=  +2.95% trades= 264 dd=  0.92%
+ 4. avgBC_sharpe=3.75 | PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.5% stop=-5.0% vol<=20pctl | A: sharpe= -0.57 ret=  -0.42% trades= 223 dd=  1.84% | B: sharpe=  2.39 ret=  +0.61% trades=  85 dd=  0.43% | C: sharpe=  5.12 ret=  +2.97% trades= 266 dd=  0.92%
+ 5. avgBC_sharpe=3.66 | PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe= -1.48 ret=  -1.60% trades= 351 dd=  3.56% | B: sharpe=  2.47 ret=  +0.94% trades= 176 dd=  0.62% | C: sharpe=  4.85 ret=  +3.80% trades= 420 dd=  1.48%
+ 6. avgBC_sharpe=3.59 | PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe= -3.52 ret=  -5.65% trades= 624 dd=  7.47% | B: sharpe=  2.84 ret=  +1.65% trades= 347 dd=  1.12% | C: sharpe=  4.35 ret=  +5.34% trades= 698 dd=  2.50%
+ 7. avgBC_sharpe=3.38 | PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.3% stop=-4.0% vol<=30pctl | A: sharpe= -1.66 ret=  -1.66% trades= 448 dd=  3.56% | B: sharpe=  3.24 ret=  +1.22% trades= 227 dd=  0.56% | C: sharpe=  3.53 ret=  +2.41% trades= 539 dd=  1.13%
+ 8. avgBC_sharpe=3.26 | PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.3% stop=-5.0% vol<=30pctl | A: sharpe= -0.16 ret=  -0.07% trades= 127 dd=  1.07% | B: sharpe=  0.65 ret=  +0.14% trades=  72 dd=  0.49% | C: sharpe=  5.86 ret=  +3.01% trades= 202 dd=  0.80%
+ 9. avgBC_sharpe=3.25 | PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.3% stop=-5.0% vol<=20pctl | A: sharpe= -4.05 ret=  -4.98% trades= 425 dd=  6.16% | B: sharpe=  2.06 ret=  +0.87% trades= 199 dd=  0.89% | C: sharpe=  4.44 ret=  +4.29% trades= 475 dd=  1.81%
+10. avgBC_sharpe=3.18 | PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.3% stop=-4.0% vol<=30pctl | A: sharpe= -1.44 ret=  -0.50% trades= 143 dd=  1.25% | B: sharpe=  1.93 ret=  +0.39% trades=  83 dd=  0.43% | C: sharpe=  4.43 ret=  +2.06% trades= 232 dd=  0.65%
+11. avgBC_sharpe=3.08 | PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.5% stop=-4.0% vol<=30pctl | A: sharpe= -1.71 ret=  -1.66% trades= 448 dd=  3.54% | B: sharpe=  2.62 ret=  +0.96% trades= 227 dd=  0.69% | C: sharpe=  3.53 ret=  +2.38% trades= 544 dd=  1.14%
+12. avgBC_sharpe=3.01 | PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.3% stop=-4.0% vol<=30pctl | A: sharpe= -3.25 ret=  -5.15% trades= 734 dd=  7.05% | B: sharpe=  2.30 ret=  +1.34% trades= 403 dd=  1.09% | C: sharpe=  3.72 ret=  +4.36% trades= 836 dd=  2.30%
+13. avgBC_sharpe=3.00 | PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.3% stop=-4.0% vol<=20pctl | A: sharpe= -1.25 ret=  -0.87% trades= 279 dd=  2.07% | B: sharpe=  1.85 ret=  +0.46% trades= 116 dd=  0.43% | C: sharpe=  4.14 ret=  +2.16% trades= 341 dd=  0.69%
+14. avgBC_sharpe=2.98 | PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.5% stop=-5.0% vol<=20pctl | A: sharpe= -4.21 ret=  -4.86% trades= 426 dd=  5.82% | B: sharpe=  1.38 ret=  +0.57% trades= 200 dd=  0.92% | C: sharpe=  4.59 ret=  +4.30% trades= 485 dd=  1.81%
+15. avgBC_sharpe=2.98 | PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe=  0.36 ret=  +0.14% trades= 128 dd=  1.04% | B: sharpe=  0.21 ret=  +0.04% trades=  72 dd=  0.49% | C: sharpe=  5.75 ret=  +2.88% trades= 203 dd=  0.72%
+16. avgBC_sharpe=2.98 | PASS | vol_mr       | volMR sma=20 entry=-3.0% tp=0.5% stop=-4.0% vol<=20pctl | A: sharpe= -1.15 ret=  -0.77% trades= 279 dd=  1.99% | B: sharpe=  1.47 ret=  +0.36% trades= 116 dd=  0.43% | C: sharpe=  4.49 ret=  +2.29% trades= 345 dd=  0.70%
+17. avgBC_sharpe=2.92 | PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.5% stop=-4.0% vol<=30pctl | A: sharpe= -0.56 ret=  -0.19% trades= 144 dd=  1.11% | B: sharpe=  1.56 ret=  +0.31% trades=  83 dd=  0.42% | C: sharpe=  4.29 ret=  +1.93% trades= 233 dd=  0.61%
+18. avgBC_sharpe=2.89 | PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.3% stop=-4.0% vol<=20pctl | A: sharpe= -4.11 ret=  -4.86% trades= 495 dd=  6.18% | B: sharpe=  1.61 ret=  +0.67% trades= 237 dd=  0.89% | C: sharpe=  4.17 ret=  +3.79% trades= 575 dd=  1.59%
+19. avgBC_sharpe=2.77 | PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.3% stop=-5.0% vol<=20pctl | A: sharpe= -0.16 ret=  -0.12% trades= 275 dd=  2.09% | B: sharpe=  2.35 ret=  +0.68% trades= 110 dd=  0.45% | C: sharpe=  3.19 ret=  +2.03% trades= 291 dd=  1.14%
+20. avgBC_sharpe=2.67 | PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.5% stop=-4.0% vol<=20pctl | A: sharpe= -4.35 ret=  -4.80% trades= 496 dd=  5.88% | B: sharpe=  0.88 ret=  +0.35% trades= 238 dd=  0.92% | C: sharpe=  4.47 ret=  +3.94% trades= 586 dd=  1.60%
+21. avgBC_sharpe=2.67 | PASS | vol_mr       | volMR sma=20 entry=-2.0% tp=0.5% stop=-4.0% vol<=30pctl | A: sharpe= -3.30 ret=  -4.99% trades= 744 dd=  6.79% | B: sharpe=  1.53 ret=  +0.84% trades= 404 dd=  1.10% | C: sharpe=  3.82 ret=  +4.34% trades= 851 dd=  2.29%
+22. avgBC_sharpe=2.54 | PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.5% stop=-5.0% vol<=20pctl | A: sharpe= -0.67 ret=  -0.46% trades= 276 dd=  2.16% | B: sharpe=  2.02 ret=  +0.55% trades= 113 dd=  0.43% | C: sharpe=  3.06 ret=  +1.86% trades= 297 dd=  0.97%
+23. avgBC_sharpe=2.29 | PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.3% stop=-4.0% vol<=20pctl | A: sharpe= -0.79 ret=  -0.53% trades= 287 dd=  2.27% | B: sharpe=  2.57 ret=  +0.72% trades= 111 dd=  0.43% | C: sharpe=  2.00 ret=  +1.20% trades= 317 dd=  1.36%
+24. avgBC_sharpe=2.23 | PASS | vol_mr       | volMR sma=10 entry=-3.0% tp=0.3% stop=-4.0% vol<=20pctl | A: sharpe= -0.64 ret=  -0.16% trades=  92 dd=  0.84% | B: sharpe=  0.08 ret=  +0.01% trades=  35 dd=  0.27% | C: sharpe=  4.37 ret=  +1.51% trades= 139 dd=  0.60%
+25. avgBC_sharpe=2.03 | PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.5% stop=-4.0% vol<=20pctl | A: sharpe= -1.21 ret=  -0.76% trades= 288 dd=  2.28% | B: sharpe=  2.22 ret=  +0.59% trades= 114 dd=  0.43% | C: sharpe=  1.83 ret=  +1.03% trades= 323 dd=  1.18%
+26. avgBC_sharpe=1.11 | PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe= -0.80 ret=  -0.78% trades= 418 dd=  3.10% | B: sharpe=  0.30 ret=  +0.11% trades= 198 dd=  0.61% | C: sharpe=  1.93 ret=  +1.59% trades= 456 dd=  2.11%
+27. avgBC_sharpe=0.49 | PASS | vol_mr       | volMR sma=10 entry=-2.0% tp=0.5% stop=-4.0% vol<=30pctl | A: sharpe= -1.30 ret=  -1.16% trades= 439 dd=  3.28% | B: sharpe=  0.23 ret=  +0.08% trades= 213 dd=  0.68% | C: sharpe=  0.76 ret=  +0.57% trades= 505 dd=  1.94%
+
+=== BEST ON PERIOD A BY FAMILY (tuning reference only; NOT a pass criterion) ===
+cascade+fund: A-best=cascade+fund retr=60% t=24h | A_sharpe=-0.28 | B_sharpe=0.03 | C_sharpe=-4.25 | bar=FAIL
+fund_carry: A-best=carry short>=80pctl long<=5pctl t=24h | A_sharpe=4.72 | B_sharpe=5.24 | C_sharpe=4.30 | bar=FAIL
+vol_mr: A-best=volMR sma=10 entry=-3.0% tp=0.5% stop=-5.0% vol<=20pctl | A_sharpe=0.62 | B_sharpe=-1.35 | C_sharpe=6.01 | bar=FAIL
+fund_disp: A-best=fundDisp K=3 rebalance=24h | A_sharpe=2.59 | B_sharpe=0.00 | C_sharpe=2.61 | bar=FAIL
+
+NOTE: Sharpe-only OOS (ignoring return sign) incorrectly flagged some
+funding-carry / dispersion sleeves with large NEGATIVE OOS returns under
+extreme drawdowns. Final bar requires return>0 AND Sharpe>0 on B and C.
+
+=== A-TUNING DISCIPLINE CHECK (matches prior research practice) ===
+Parameters must be selectable from Period A alone. Below: for each family,
+the A-Sharpe top-5 and whether those also clear B+C.
+
+-- cascade+fund (4 combos) --
+  A-rank#1: A_sh=-0.28 A_ret=-0.08% | B_sh=0.03 B_ret=+0.01% | C_sh=-4.25 C_ret=-2.03% | B+C bar=FAIL | cascade+fund retr=60% t=24h
+  A-rank#2: A_sh=-0.76 A_ret=-0.19% | B_sh=-0.69 B_ret=-0.29% | C_sh=-4.06 C_ret=-1.93% | B+C bar=FAIL | cascade+fund retr=60% t=8h
+  A-rank#3: A_sh=-2.27 A_ret=-0.62% | B_sh=-3.41 B_ret=-1.06% | C_sh=-11.16 C_ret=-4.12% | B+C bar=FAIL | cascade+fund retr=40% t=24h
+  A-rank#4: A_sh=-2.58 A_ret=-0.65% | B_sh=-3.34 B_ret=-1.04% | C_sh=-10.92 C_ret=-4.01% | B+C bar=FAIL | cascade+fund retr=40% t=8h
+  => A-best B+C outcome: FAIL
+
+-- fund_carry (18 combos) --
+  A-rank#1: A_sh=4.72 A_ret=+3.97% | B_sh=5.24 B_ret=-15.91% | C_sh=4.30 C_ret=+5.84% | B+C bar=FAIL | carry short>=80pctl long<=5pctl t=24h
+  A-rank#2: A_sh=4.70 A_ret=+5.82% | B_sh=5.10 B_ret=-16.91% | C_sh=4.28 C_ret=+12.05% | B+C bar=FAIL | carry short>=80pctl long<=10pctl t=24h
+  A-rank#3: A_sh=4.45 A_ret=+6.63% | B_sh=4.95 B_ret=-16.59% | C_sh=4.30 C_ret=+22.15% | B+C bar=FAIL | carry short>=80pctl long<=20pctl t=24h
+  A-rank#4: A_sh=4.23 A_ret=+11.77% | B_sh=4.77 B_ret=-17.55% | C_sh=3.66 C_ret=+13.40% | B+C bar=FAIL | carry short>=80pctl long<=5pctl t=72h
+  A-rank#5: A_sh=4.04 A_ret=+13.80% | B_sh=4.56 B_ret=-16.96% | C_sh=3.60 C_ret=+17.00% | B+C bar=FAIL | carry short>=80pctl long<=10pctl t=72h
+  => A-best B+C outcome: FAIL
+
+-- vol_mr (32 combos) --
+  A-rank#1: A_sh=0.62 A_ret=+0.17% | B_sh=-1.35 B_ret=-0.20% | C_sh=6.01 C_ret=+2.22% | B+C bar=FAIL | volMR sma=10 entry=-3.0% tp=0.5% stop=-5.0% vol<=20pctl
+  A-rank#2: A_sh=0.36 A_ret=+0.14% | B_sh=0.21 B_ret=+0.04% | C_sh=5.75 C_ret=+2.88% | B+C bar=PASS | volMR sma=10 entry=-3.0% tp=0.5% stop=-5.0% vol<=30pctl
+  A-rank#3: A_sh=0.31 A_ret=+0.09% | B_sh=-0.59 B_ret=-0.09% | C_sh=6.02 C_ret=+2.28% | B+C bar=FAIL | volMR sma=10 entry=-3.0% tp=0.3% stop=-5.0% vol<=20pctl
+  A-rank#4: A_sh=-0.02 A_ret=-0.01% | B_sh=-0.70 B_ret=-0.10% | C_sh=4.32 C_ret=+1.45% | B+C bar=FAIL | volMR sma=10 entry=-3.0% tp=0.5% stop=-4.0% vol<=20pctl
+  A-rank#5: A_sh=-0.16 A_ret=-0.12% | B_sh=2.35 B_ret=+0.68% | C_sh=3.19 C_ret=+2.03% | B+C bar=PASS | volMR sma=10 entry=-2.0% tp=0.3% stop=-5.0% vol<=20pctl
+  => A-best B+C outcome: FAIL
+
+-- fund_disp (4 combos) --
+  A-rank#1: A_sh=2.59 A_ret=+6.18% | B_sh=0.00 B_ret=-45.59% | C_sh=2.61 C_ret=-22.23% | B+C bar=FAIL | fundDisp K=3 rebalance=24h
+  A-rank#2: A_sh=2.49 A_ret=+1.16% | B_sh=0.61 B_ret=-71.60% | C_sh=2.69 C_ret=-4.46% | B+C bar=FAIL | fundDisp K=3 rebalance=8h
+  A-rank#3: A_sh=1.22 A_ret=+3.37% | B_sh=1.63 B_ret=-52.51% | C_sh=2.11 C_ret=-21.97% | B+C bar=FAIL | fundDisp K=5 rebalance=24h
+  A-rank#4: A_sh=1.09 A_ret=-2.69% | B_sh=0.63 B_ret=-62.19% | C_sh=1.91 C_ret=-28.31% | B+C bar=FAIL | fundDisp K=5 rebalance=8h
+  => A-best B+C outcome: FAIL
+
+Combos with return>0 AND Sharpe>0 on A AND B AND C: 1/58
+  1. avgBC=2.98 | vol_mr       | volMR sma=10 entry=-3.0% tp=0.5% stop=-5.0% vol<=30pctl | A: sharpe=  0.36 ret=  +0.14% trades= 128 dd=  1.04% | B: sharpe=  0.21 ret=  +0.04% trades=  72 dd=  0.49% | C: sharpe=  5.75 ret=  +2.88% trades= 203 dd=  0.72%
+
+BLUNT VERDICT:
+- cascade+funding on 50 symbols: all 4 FAIL B+C (more trades, still no edge).
+- funding CARRY: mechanically distinct from prior directional funding signal;
+  no combo clears return>0 on both B and C (large drawdowns; B often negative).
+- funding dispersion: same — unstable Sharpe with large negative returns; FAIL.
+- low-vol mean reversion: many clear B+C return+Sharpe, BUT almost all LOSE on A,
+  so A-only tuning would not select them. Only 1 combo is profitable+Sharpe on
+  A+B+C, and its Period B edge is tiny (+0.04% / Sharpe 0.21) — not promotion-grade.
+- Overall: no robust A-tuned strategy survives this sweep for live promotion.
+
+=== ADDON: strategy.py cascade+funding on full 50-symbol universe ===
+Signal/exit/sizing: unmodified from strategy.py (check_entry_signal + tp/sl + 1% risk).
+No new entry/exit variants. Fixed live params (nothing to retune beyond A reporting).
+Pass bar unchanged: return>0 AND Sharpe>0 on both B and C.
+FAIL | strategy_py | strategy.py cascade+funding x50 (drop=4% vol=2x fund<=20pctl tp=0.5% sl=1.5% risk=1% maxpos=2 breaker=900) | A: sharpe= -1.96 ret= -10.25% trades=  29 dd= 14.58% | B: sharpe=  0.47 ret= -10.52% trades=  40 dd= 48.36% | C: sharpe=  1.58 ret= -10.30% trades=  57 dd= 55.94%
+Verdict: FAIL
+
+=== ADDON: strategy.py cascade+funding on 50 symbols @ 15-MINUTE bars ===
+Data: Binance USDT-M public klines interval=15m + existing funding CSVs.
+Frequency adaptation only: VOL_AVG_PERIOD 24h -> 96 fifteen-minute bars (same real-time window as 24 hourly bars). Drop 4%/bar, vol ratio 2x,
+funding <=20pctl, tp/sl/risk/maxpos unchanged from strategy.py.
+Note: a 4% move per 15m bar is a stricter event than 4% per hour — left unchanged per request.
+Pass bar unchanged: return>0 AND Sharpe>0 on both B and C.
+Sharpe annualized with sqrt(24*4*365) for 15m equity returns.
+FAIL | strat_15m  | strategy.py cascade+funding x50 @15m (drop=4%/bar vol=2x/96bars=24h fund<=20pctl tp=0.5% sl=1.5% risk=1% maxpos=2) | A: sharpe= -1.43 ret= -10.15% trades=  34 dd= 13.29% | B: sharpe=  0.44 ret= -10.36% trades=  80 dd= 27.81% | C: sharpe=  0.75 ret= -10.96% trades=  26 dd= 50.73%
+Verdict: FAIL
+
+Results written to C:\Users\Aditya Raj Singh\OneDrive\Desktop\LIQUITY TRADINGH\multi_strategy_sweep_results.txt

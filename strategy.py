@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from backtest_funding_signal import (
+from backtesting.backtest_funding_signal import (
     LOOKBACK,
     MIN_FUNDING_SAMPLES,
     FundingAsOf,

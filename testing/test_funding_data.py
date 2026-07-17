@@ -7,6 +7,13 @@ Funding prints about every 8 hours (~540 records / 180 days).
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import csv
 import sys
 import time
@@ -29,7 +36,8 @@ SYMBOLS = (
 )
 DAYS = 180
 MAX_PER_REQUEST = 1000
-DATA_DIR = Path(__file__).resolve().parent / "data"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = PROJECT_ROOT / "data"
 
 
 def _get_page(symbol: str, start_time_ms: int, end_time_ms: int) -> list[dict[str, Any]]:

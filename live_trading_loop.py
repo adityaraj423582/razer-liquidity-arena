@@ -1,5 +1,6 @@
-# Live loop: cascade+funding opportunistic longs on LTP. BUILD ONLY - start manually.
-# Default is a single iteration (--once behavior); pass --loop for continuous hourly runs.
+# Live loop: cascade+funding opportunistic longs on LTP (RAZERDEMO).
+# Continuous unattended hourly loop by default (matches 1h candles). Pass --once for a single supervised iteration.
+# Optional LIVE_LOOP_INTERVAL_S env override is for local stress tests only; production default remains 3600.
 
 from __future__ import annotations
 
@@ -7,29 +8,32 @@ import argparse
 import asyncio
 import json
 import logging
+import os
 import time
+import traceback
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, ROUND_DOWN
+from pathlib import Path
 
 import requests
 import websockets
 
-from backtest_funding_signal import FundingAsOf, FundingPoint
+from ai_agent import get_regime_assessment
+from backtesting.backtest_funding_signal import FundingAsOf, FundingPoint
 from strategy import (
     CIRCUIT_BREAKER,
     RISK_FRACTION,
     STOP_LOSS,
     TAKE_PROFIT,
-    VOL_AVG_PERIOD,
     Candle,
     calculate_position_size,
     check_circuit_breaker,
     check_entry_signal,
 )
-from test_marketdata import _decode_frame
-from test_order_lifecycle import api_request, load_credentials
+from testing.test_marketdata import _decode_frame
+from testing.test_order_lifecycle import api_request, load_credentials
 
 BINANCE_KLINES_URL = "https://fapi.binance.com/fapi/v1/klines"
 BINANCE_FUNDING_URL = "https://fapi.binance.com/fapi/v1/fundingRate"
@@ -38,13 +42,22 @@ SYMBOL_MAP = {
     "BTCUSDT": "BINANCE_PERP_BTC_USDT",
     "ETHUSDT": "BINANCE_PERP_ETH_USDT",
 }
-LOOP_INTERVAL_S = 3600
-HISTORY_BARS = VOL_AVG_PERIOD + 10
+# Hourly: fetch_recent_candles uses interval="1h"; sleep matches that bar cadence.
+LOOP_INTERVAL_S = int(os.environ.get("LIVE_LOOP_INTERVAL_S", "3600"))
+HEARTBEAT_PATH = Path("heartbeat.txt")
+# 30 days of hourly bars: enough for the AI regime vol percentile; signal uses the tail
+HISTORY_BARS = 720
 FUNDING_HISTORY_DAYS = 30
 LEVERAGE = "2"
 TERMINAL_ORDER_STATES = {"CANCELLED", "CANCELED", "REJECTED", "EXPIRED"}
 
 logger = logging.getLogger("live_loop")
+
+
+def write_heartbeat() -> None:
+    """Overwrite heartbeat.txt with the current UTC timestamp (liveness signal)."""
+    stamp = datetime.now(tz=timezone.utc).isoformat()
+    HEARTBEAT_PATH.write_text(stamp + "\n", encoding="utf-8")
 
 
 @dataclass
@@ -255,33 +268,44 @@ def place_entry_order(ctx: Context, binance_sym: str, equity: float) -> None:
 def run_iteration(ctx: Context) -> None:
     now = datetime.now(tz=timezone.utc).isoformat()
     logger.info(f"--- iteration start {now} ---")
+    try:
+        # (a) Circuit breaker first, every loop, no exceptions
+        equity = fetch_equity(ctx)
+        breaker_on = True if equity is None else check_circuit_breaker(equity)
+        equity_text = f"{equity:.2f}" if equity is not None else "UNKNOWN"
+        logger.info(
+            f"equity={equity_text} USDT | breaker={'ACTIVE' if breaker_on else 'clear'} "
+            f"(floor {CIRCUIT_BREAKER:.0f})"
+        )
 
-    # (a) Circuit breaker first, every loop, no exceptions
-    equity = fetch_equity(ctx)
-    breaker_on = True if equity is None else check_circuit_breaker(equity)
-    equity_text = f"{equity:.2f}" if equity is not None else "UNKNOWN"
-    logger.info(f"equity={equity_text} USDT | breaker={'ACTIVE' if breaker_on else 'clear'} (floor {CIRCUIT_BREAKER:.0f})")
+        if breaker_on:
+            logger.info("CIRCUIT BREAKER ACTIVE - no new entries")
+        else:
+            # (b) AI regime gate then signal check, once per symbol per iteration
+            for binance_sym in SYMBOL_MAP:
+                candles = fetch_recent_candles(binance_sym)
+                funding = fetch_recent_funding(binance_sym)
+                assessment = get_regime_assessment(binance_sym, candles, funding)
+                logger.info(
+                    f"{binance_sym}: AI regime={assessment['decision']} ({assessment['reason']})"
+                )
+                if assessment["decision"] == "PAUSE":
+                    logger.info(f"{binance_sym}: AI Agent PAUSE - skipping this symbol this iteration")
+                    continue
+                signal = check_entry_signal(candles, len(candles) - 1, funding)
+                logger.info(f"{binance_sym}: signal={'YES' if signal else 'no'}")
+                if not signal:
+                    continue
+                # (c) Only if flat on that symbol
+                if binance_sym in ctx.open_positions:
+                    logger.info(f"{binance_sym}: signal present but position/order already open; skipping")
+                    continue
+                place_entry_order(ctx, binance_sym, equity)
 
-    if breaker_on:
-        logger.info("CIRCUIT BREAKER ACTIVE - no new entries")
-    else:
-        # (b) Signal check per symbol
-        for binance_sym in SYMBOL_MAP:
-            candles = fetch_recent_candles(binance_sym)
-            funding = fetch_recent_funding(binance_sym)
-            signal = check_entry_signal(candles, len(candles) - 1, funding)
-            logger.info(f"{binance_sym}: signal={'YES' if signal else 'no'}")
-            if not signal:
-                continue
-            # (c) Only if flat on that symbol
-            if binance_sym in ctx.open_positions:
-                logger.info(f"{binance_sym}: signal present but position/order already open; skipping")
-                continue
-            place_entry_order(ctx, binance_sym, equity)
-
-    # (d) Reconcile tracked orders + close out the log line
-    reconcile_positions(ctx)
-    logger.info("--- iteration end ---")
+        # (d) Reconcile tracked orders
+        reconcile_positions(ctx)
+    finally:
+        logger.info("--- iteration end ---")
 
 
 def set_leverage(ctx_keys: tuple[str, str, str]) -> None:
@@ -328,8 +352,20 @@ def startup(ctx_keys: tuple[str, str, str]) -> Context:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="LTP live loop (default: one iteration)")
-    parser.add_argument("--loop", action="store_true", help="run continuously every hour")
+    parser = argparse.ArgumentParser(
+        description="LTP live loop (default: continuous hourly; RAZERDEMO only)"
+    )
+    parser.add_argument(
+        "--once",
+        action="store_true",
+        help="run a single supervised iteration then exit (legacy mode)",
+    )
+    # Keep --loop as a no-op alias so older launch commands still work.
+    parser.add_argument(
+        "--loop",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -350,13 +386,35 @@ def main() -> int:
         logger.error(f"Startup failed: {exc}")
         return 1
 
+    if args.once:
+        logger.info("running single supervised iteration (--once)")
+    else:
+        logger.info(
+            f"entering continuous loop (interval={LOOP_INTERVAL_S}s, hourly candle cadence); "
+            "Ctrl+C to stop"
+        )
+
     try:
         while True:
             try:
                 run_iteration(ctx)
-            except Exception as exc:
-                logger.error(f"Iteration failed: {exc}; continuing to next iteration")
-            if not args.loop:
+            except Exception:
+                logger.error(
+                    "Iteration failed with unhandled exception; "
+                    "will wait for next interval and continue\n%s",
+                    traceback.format_exc(),
+                )
+            finally:
+                # Heartbeat after success or caught failure — never block the loop.
+                try:
+                    write_heartbeat()
+                except Exception:
+                    logger.warning(
+                        "Failed to write heartbeat.txt; continuing\n%s",
+                        traceback.format_exc(),
+                    )
+
+            if args.once:
                 break
             logger.info(f"sleeping {LOOP_INTERVAL_S}s until next iteration (Ctrl+C to stop)")
             time.sleep(LOOP_INTERVAL_S)

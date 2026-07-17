@@ -12,3 +12,5 @@ env/
 *.log
 .DS_Store
 Thumbs.db
+debug_prompt_btcusdt.txt
+heartbeat.txt

@@ -8,6 +8,13 @@ No leverage. Flat 0.05% fee on entry and exit.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import csv
 import math
 import sys
@@ -17,7 +24,8 @@ from pathlib import Path
 from statistics import mean, pstdev
 from typing import Literal
 
-DATA_DIR = Path(__file__).resolve().parent / "data"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = PROJECT_ROOT / "data"
 SYMBOLS = ("BTCUSDT", "ETHUSDT", "SOLUSDT")
 SMA_PERIOD = 20
 ENTRY_DEV = -0.02

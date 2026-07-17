@@ -7,6 +7,13 @@ Paginates past the 1500-candle per-request limit for longer histories.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import csv
 import sys
 import time
@@ -31,7 +38,8 @@ INTERVAL = "1h"
 INTERVAL_MS = 60 * 60 * 1000
 DAYS = 180
 MAX_PER_REQUEST = 1500  # Binance hard limit
-DATA_DIR = Path(__file__).resolve().parent / "data"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = PROJECT_ROOT / "data"
 
 
 def _get_klines_page(symbol: str, start_time_ms: int, end_time_ms: int) -> list[list[Any]]:

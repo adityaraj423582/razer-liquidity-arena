@@ -7,6 +7,13 @@ Does not place orders or touch risk logic.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path as _Path
+
+_ROOT = _Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import hashlib
 import hmac
 import os
@@ -43,7 +50,7 @@ def sign_request(secret_key: str, params: Mapping[str, str], nonce: str) -> str:
 
 
 def main() -> int:
-    load_dotenv()
+    load_dotenv(_ROOT / ".env")
 
     access_key = os.getenv("LTP_ACCESS_KEY", "").strip()
     secret_key = os.getenv("LTP_SECRET_KEY", "").strip()

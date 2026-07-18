@@ -45,6 +45,7 @@ SYMBOL_MAP = {
 # Hourly: fetch_recent_candles uses interval="1h"; sleep matches that bar cadence.
 LOOP_INTERVAL_S = int(os.environ.get("LIVE_LOOP_INTERVAL_S", "3600"))
 HEARTBEAT_PATH = Path("heartbeat.txt")
+OPEN_POSITIONS_PATH = Path("open_positions.json")
 # 30 days of hourly bars: enough for the AI regime vol percentile; signal uses the tail
 HISTORY_BARS = 720
 FUNDING_HISTORY_DAYS = 30
@@ -58,6 +59,83 @@ def write_heartbeat() -> None:
     """Overwrite heartbeat.txt with the current UTC timestamp (liveness signal)."""
     stamp = datetime.now(tz=timezone.utc).isoformat()
     HEARTBEAT_PATH.write_text(stamp + "\n", encoding="utf-8")
+
+
+def load_open_positions() -> dict[str, str]:
+    """Load persisted binance_sym -> orderId map. Missing/invalid file -> empty dict."""
+    if not OPEN_POSITIONS_PATH.exists():
+        return {}
+    try:
+        raw = json.loads(OPEN_POSITIONS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning(f"Could not read {OPEN_POSITIONS_PATH}: {exc}; starting empty")
+        return {}
+    if not isinstance(raw, dict):
+        logger.warning(f"{OPEN_POSITIONS_PATH} is not a JSON object; starting empty")
+        return {}
+    out: dict[str, str] = {}
+    for key, value in raw.items():
+        if isinstance(key, str) and value is not None and str(value).strip():
+            out[key] = str(value)
+    return out
+
+
+def save_open_positions(ctx: Context) -> None:
+    """Persist open_positions immediately after any mutation."""
+    try:
+        OPEN_POSITIONS_PATH.write_text(
+            json.dumps(ctx.open_positions, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        logger.warning(f"Failed to write {OPEN_POSITIONS_PATH}: {exc}")
+
+
+def verify_open_positions_against_api(ctx: Context) -> None:
+    """
+    Drop file-loaded entries that are already terminal on the exchange.
+    Fail closed: if the status query fails, keep the symbol blocked.
+    """
+    for binance_sym, order_id in list(ctx.open_positions.items()):
+        try:
+            payload = api_request(
+                "GET",
+                "api/v1/trading/order",
+                ctx.access_key,
+                ctx.secret_key,
+                ctx.api_host,
+                {"orderId": order_id},
+            )
+        except Exception as exc:
+            logger.warning(
+                f"{binance_sym}: could not verify order {order_id} at startup ({exc}); "
+                "keeping blocked (fail closed)"
+            )
+            continue
+        data = payload.get("data") or {}
+        state = str(data.get("orderState", "")).upper() if isinstance(data, dict) else ""
+        if state in TERMINAL_ORDER_STATES:
+            logger.info(
+                f"{binance_sym}: persisted order {order_id} is {state} on exchange; "
+                "removing from open_positions"
+            )
+            del ctx.open_positions[binance_sym]
+        elif state == "FILLED":
+            logger.info(
+                f"{binance_sym}: persisted order {order_id} still FILLED; "
+                "keeping blocked (tp/sl managed)"
+            )
+        elif state:
+            logger.info(
+                f"{binance_sym}: persisted order {order_id} state={state}; keeping blocked"
+            )
+        else:
+            logger.warning(
+                f"{binance_sym}: persisted order {order_id} has unknown state "
+                f"(code={payload.get('code')}); keeping blocked (fail closed)"
+            )
+    # Always rewrite so the file exists for GHA persistence even when empty
+    save_open_positions(ctx)
 
 
 @dataclass
@@ -200,16 +278,25 @@ def fetch_equity(ctx: Context) -> float | None:
 
 
 def reconcile_positions(ctx: Context) -> None:
+    changed = False
     for binance_sym, order_id in list(ctx.open_positions.items()):
-        payload = api_request(
-            "GET", "api/v1/trading/order", ctx.access_key, ctx.secret_key, ctx.api_host,
-            {"orderId": order_id},
-        )
+        try:
+            payload = api_request(
+                "GET", "api/v1/trading/order", ctx.access_key, ctx.secret_key, ctx.api_host,
+                {"orderId": order_id},
+            )
+        except Exception as exc:
+            logger.warning(
+                f"{binance_sym}: reconcile query failed for order {order_id} ({exc}); "
+                "keeping blocked"
+            )
+            continue
         data = payload.get("data") or {}
         state = str(data.get("orderState", "")).upper() if isinstance(data, dict) else ""
         if state in TERMINAL_ORDER_STATES:
             logger.info(f"{binance_sym}: entry order {order_id} is {state}; symbol unblocked")
             del ctx.open_positions[binance_sym]
+            changed = True
         elif state == "FILLED":
             logger.info(
                 f"{binance_sym}: entry order {order_id} FILLED; position managed by attached tp/sl "
@@ -217,6 +304,8 @@ def reconcile_positions(ctx: Context) -> None:
             )
         elif state:
             logger.info(f"{binance_sym}: entry order {order_id} state={state}; symbol still blocked")
+    if changed:
+        save_open_positions(ctx)
 
 
 def place_entry_order(ctx: Context, binance_sym: str, equity: float) -> None:
@@ -256,6 +345,7 @@ def place_entry_order(ctx: Context, binance_sym: str, equity: float) -> None:
     order_id = data.get("orderId") if isinstance(data, dict) else None
     if code in (200000, "200000") and order_id:
         ctx.open_positions[binance_sym] = str(order_id)
+        save_open_positions(ctx)
         logger.info(
             f"{binance_sym}: PLACED LIMIT BUY qty={fmt_dec(qty_dec)} @ {fmt_dec(limit_price)} "
             f"tp={fmt_dec(tp_trigger)} sl={fmt_dec(sl_trigger)} orderId={order_id} "
@@ -339,7 +429,21 @@ def startup(ctx_keys: tuple[str, str, str]) -> Context:
     sym_info = {
         SYMBOL_MAP[b]: fetch_sym_info(ctx_keys, SYMBOL_MAP[b]) for b in SYMBOL_MAP
     }
-    ctx = Context(access_key=access_key, secret_key=secret_key, api_host=api_host, sym_info=sym_info)
+    loaded = load_open_positions()
+    ctx = Context(
+        access_key=access_key,
+        secret_key=secret_key,
+        api_host=api_host,
+        sym_info=sym_info,
+        open_positions=loaded,
+    )
+    if loaded:
+        logger.info(f"loaded {len(loaded)} persisted open_positions from {OPEN_POSITIONS_PATH}")
+    else:
+        logger.info(f"no persisted open_positions (file missing or empty)")
+    # Verify against live order status before blocking entries this run
+    verify_open_positions_against_api(ctx)
+    logger.info(f"open_positions after API verify: {ctx.open_positions or '{}'}")
 
     for binance_sym, ltp_sym in SYMBOL_MAP.items():
         bid, ask = asyncio.run(fetch_bbo(ltp_sym))

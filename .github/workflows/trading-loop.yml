@@ -1,0 +1,59 @@
+name: Trading Loop
+
+on:
+  schedule:
+    # Every hour at minute 0 UTC
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  trade-once:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run trading loop (--once)
+        env:
+          LTP_ACCESS_KEY: ${{ secrets.LTP_ACCESS_KEY }}
+          LTP_SECRET_KEY: ${{ secrets.LTP_SECRET_KEY }}
+          LTP_API_HOST: ${{ secrets.LTP_API_HOST }}
+          LTP_AI_API_KEY: ${{ secrets.LTP_AI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          AI_BACKEND: ${{ secrets.AI_BACKEND }}
+        run: python live_trading_loop.py --once
+
+      - name: Commit and push updated logs
+        # Persist state/logs across ephemeral runners. [skip ci] avoids
+        # re-triggering this workflow on the log commit.
+        # Force-add: heartbeat.txt and *.log are gitignored locally.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -f heartbeat.txt live_trading.log ai_decisions.log open_positions.json || true
+          if [ -d audit ]; then
+            git add -f audit/*.jsonl || true
+          fi
+
+          if git diff --staged --quiet; then
+            echo "No log/audit changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Update logs [skip ci]"
+          git pull --rebase origin HEAD || true
+          git push

@@ -1,0 +1,2 @@
+{"timestamp": "2026-07-18T13:20:04.648322+00:00", "symbol": "BTCUSDT", "decision": "NORMAL", "reason": "vol 0.00211 below 90th pctl and funding 0.000070 within [0.000007, 0.000100] [MOCK_BACKEND]", "backend": "mock", "warning": false}
+{"timestamp": "2026-07-18T13:20:05.692978+00:00", "symbol": "ETHUSDT", "decision": "NORMAL", "reason": "vol 0.00187 below 90th pctl and funding 0.000039 within [-0.000020, 0.000078] [MOCK_BACKEND]", "backend": "mock", "warning": false}

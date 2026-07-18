@@ -11,6 +11,7 @@
 - AI Agent regime gate built (ai_agent.py): pluggable get_regime_assessment(); mock backend intact; real LTP AI backend coded behind AI_BACKEND flag; PAUSE/NORMAL decisions logged to ai_decisions.log and durable dated audit/ai_decisions_YYYYMMDD.jsonl with backend field
 - Continuous unattended live loop with heartbeat: live_trading_loop.py runs hourly by default (matches 1h candles), per-iteration exception containment with full traceback, heartbeat.txt overwritten each cycle; RAZERDEMO only
 - Project folder reorganization: backtesting/, multi_strategy/, testing/ packages; root keeps live runtime + strategy + ai_agent; imports and data/ paths updated; live_trading_loop.py --once sanity-checked after the move
+- Fixed competition_universe.json to match officially published 50-symbol list (was previously a volume-ranked approximation, 24/50 symbols were incorrect). Note: earlier 50-symbol backtest sweep (multi_strategy_sweep_results.txt) was run against the OLD incorrect universe and should be considered indicative but not exact for the real competition set.
 
 ## Not done yet
 - real AI API integrated, not yet tested (run python ai_agent.py or python testing/test_ai_api.py; only then set AI_BACKEND=real)

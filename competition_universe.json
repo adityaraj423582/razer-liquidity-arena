@@ -1,142 +1,419 @@
 {
-  "source": "LTP /api/v1/trading/sym/info BINANCE_PERP_*_USDT \u2229 Binance TRADING USDT-M, ranked by 24h quoteVolume",
+  "source": "Official Liquidity Arena published 50-symbol list (exact order), verified against LTP GET /api/v1/trading/sym/info BINANCE_PERP_*_USDT",
   "requested_size": 50,
-  "ltp_count": 489,
-  "intersection_count": 440,
-  "headroom_candidates": [
-    "BTCUSDT",
-    "ETHUSDT",
-    "SOLUSDT",
-    "HYPEUSDT",
-    "AKEUSDT",
-    "ZECUSDT",
-    "XRPUSDT",
-    "ESPORTSUSDT",
-    "ONDOUSDT",
-    "DOGEUSDT",
-    "BNBUSDT",
-    "USUSDT",
-    "NEARUSDT",
-    "BANKUSDT",
-    "1000PEPEUSDT",
-    "LABUSDT",
-    "WLDUSDT",
-    "SUIUSDT",
-    "ADAUSDT",
-    "PUMPUSDT",
-    "DEXEUSDT",
-    "ENAUSDT",
-    "LINKUSDT",
-    "HOMEUSDT",
-    "XLMUSDT",
-    "TAOUSDT",
-    "AAVEUSDT",
-    "PAXGUSDT",
-    "BCHUSDT",
-    "UNIUSDT",
-    "BLUAIUSDT",
-    "EVAAUSDT",
-    "FLOCKUSDT",
-    "AVAXUSDT",
-    "1000BONKUSDT",
-    "LITUSDT",
-    "LTCUSDT",
-    "RAVEUSDT",
-    "DOTUSDT",
-    "DODOXUSDT",
-    "BILLUSDT",
-    "LDOUSDT",
-    "ALLOUSDT",
-    "XAUTUSDT",
-    "TACUSDT",
-    "ARBUSDT",
-    "INJUSDT",
-    "LUMIAUSDT",
-    "FILUSDT",
-    "SLXUSDT",
-    "AIGENSYNUSDT",
-    "TIAUSDT",
-    "1000XECUSDT",
-    "OPUSDT",
-    "TRXUSDT",
-    "1000SHIBUSDT",
-    "ASTERUSDT",
-    "XPLUSDT",
-    "XMRUSDT",
-    "EIGENUSDT",
-    "TUSDT",
-    "SYNUSDT",
-    "JTOUSDT",
-    "ORDIUSDT",
-    "APTUSDT",
-    "BSBUSDT",
-    "SKLUSDT",
-    "UBUSDT",
-    "VELVETUSDT",
-    "ETHFIUSDT",
-    "HBARUSDT",
-    "ETCUSDT",
-    "CRVUSDT",
-    "PYTHUSDT",
-    "WLFIUSDT",
-    "FETUSDT",
-    "WIFUSDT",
-    "ATOMUSDT",
-    "USELESSUSDT",
-    "JUPUSDT"
+  "official_bases": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "USDC",
+    "XRP",
+    "SOL",
+    "TRX",
+    "HYPE",
+    "DOGE",
+    "ZEC",
+    "XLM",
+    "ADA",
+    "XMR",
+    "LINK",
+    "CC",
+    "BCH",
+    "LTC",
+    "HBAR",
+    "SUI",
+    "LAB",
+    "AVAX",
+    "XAUT",
+    "NEAR",
+    "1000SHIB",
+    "M",
+    "TAO",
+    "UNI",
+    "PAXG",
+    "WLFI",
+    "ASTER",
+    "ONDO",
+    "WLD",
+    "DOT",
+    "SKY",
+    "AAVE",
+    "MORPHO",
+    "ICP",
+    "ETC",
+    "DEXE",
+    "1000PEPE",
+    "QNT",
+    "BEAT",
+    "KAS",
+    "STABLE",
+    "RENDER",
+    "ATOM",
+    "JUP",
+    "POL",
+    "ALGO",
+    "JST"
   ],
-  "resolved_at_utc": "2026-07-17T05:32:36.568564+00:00",
   "symbols": [
     "BTCUSDT",
     "ETHUSDT",
-    "SOLUSDT",
-    "HYPEUSDT",
-    "AKEUSDT",
-    "ZECUSDT",
-    "XRPUSDT",
-    "ESPORTSUSDT",
-    "ONDOUSDT",
-    "DOGEUSDT",
     "BNBUSDT",
-    "USUSDT",
-    "NEARUSDT",
-    "BANKUSDT",
-    "1000PEPEUSDT",
-    "LABUSDT",
-    "WLDUSDT",
-    "SUIUSDT",
-    "ADAUSDT",
-    "PUMPUSDT",
-    "DEXEUSDT",
-    "ENAUSDT",
-    "LINKUSDT",
-    "HOMEUSDT",
+    "USDCUSDT",
+    "XRPUSDT",
+    "SOLUSDT",
+    "TRXUSDT",
+    "HYPEUSDT",
+    "DOGEUSDT",
+    "ZECUSDT",
     "XLMUSDT",
-    "TAOUSDT",
-    "AAVEUSDT",
-    "PAXGUSDT",
+    "ADAUSDT",
+    "XMRUSDT",
+    "LINKUSDT",
+    "CCUSDT",
     "BCHUSDT",
-    "UNIUSDT",
-    "BLUAIUSDT",
-    "EVAAUSDT",
-    "FLOCKUSDT",
-    "AVAXUSDT",
-    "1000BONKUSDT",
-    "LITUSDT",
     "LTCUSDT",
-    "RAVEUSDT",
+    "HBARUSDT",
+    "SUIUSDT",
+    "LABUSDT",
+    "AVAXUSDT",
+    "XAUTUSDT",
+    "NEARUSDT",
+    "1000SHIBUSDT",
+    "MUSDT",
+    "TAOUSDT",
+    "UNIUSDT",
+    "PAXGUSDT",
+    "WLFIUSDT",
+    "ASTERUSDT",
+    "ONDOUSDT",
+    "WLDUSDT",
     "DOTUSDT",
-    "DODOXUSDT",
-    "LDOUSDT",
-    "ALLOUSDT",
-    "TACUSDT",
-    "ARBUSDT",
-    "INJUSDT",
-    "LUMIAUSDT",
-    "FILUSDT",
-    "TIAUSDT",
-    "1000XECUSDT",
-    "OPUSDT"
+    "SKYUSDT",
+    "AAVEUSDT",
+    "MORPHOUSDT",
+    "ICPUSDT",
+    "ETCUSDT",
+    "DEXEUSDT",
+    "1000PEPEUSDT",
+    "QNTUSDT",
+    "BEATUSDT",
+    "KASUSDT",
+    "STABLEUSDT",
+    "RENDERUSDT",
+    "ATOMUSDT",
+    "JUPUSDT",
+    "POLUSDT",
+    "ALGOUSDT",
+    "JSTUSDT"
   ],
-  "final_count": 50
+  "final_count": 50,
+  "ltp_verified_count": 50,
+  "ltp_failed_count": 0,
+  "ltp_failures": [],
+  "ltp_verified": [
+    {
+      "symbol": "BTCUSDT",
+      "ltp_sym": "BINANCE_PERP_BTC_USDT",
+      "state": "live",
+      "originalSymbol": "BTCUSDT"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "ltp_sym": "BINANCE_PERP_ETH_USDT",
+      "state": "live",
+      "originalSymbol": "ETHUSDT"
+    },
+    {
+      "symbol": "BNBUSDT",
+      "ltp_sym": "BINANCE_PERP_BNB_USDT",
+      "state": "live",
+      "originalSymbol": "BNBUSDT"
+    },
+    {
+      "symbol": "USDCUSDT",
+      "ltp_sym": "BINANCE_PERP_USDC_USDT",
+      "state": "live",
+      "originalSymbol": "USDCUSDT"
+    },
+    {
+      "symbol": "XRPUSDT",
+      "ltp_sym": "BINANCE_PERP_XRP_USDT",
+      "state": "live",
+      "originalSymbol": "XRPUSDT"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "ltp_sym": "BINANCE_PERP_SOL_USDT",
+      "state": "live",
+      "originalSymbol": "SOLUSDT"
+    },
+    {
+      "symbol": "TRXUSDT",
+      "ltp_sym": "BINANCE_PERP_TRX_USDT",
+      "state": "live",
+      "originalSymbol": "TRXUSDT"
+    },
+    {
+      "symbol": "HYPEUSDT",
+      "ltp_sym": "BINANCE_PERP_HYPE_USDT",
+      "state": "live",
+      "originalSymbol": "HYPEUSDT"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "ltp_sym": "BINANCE_PERP_DOGE_USDT",
+      "state": "live",
+      "originalSymbol": "DOGEUSDT"
+    },
+    {
+      "symbol": "ZECUSDT",
+      "ltp_sym": "BINANCE_PERP_ZEC_USDT",
+      "state": "live",
+      "originalSymbol": "ZECUSDT"
+    },
+    {
+      "symbol": "XLMUSDT",
+      "ltp_sym": "BINANCE_PERP_XLM_USDT",
+      "state": "live",
+      "originalSymbol": "XLMUSDT"
+    },
+    {
+      "symbol": "ADAUSDT",
+      "ltp_sym": "BINANCE_PERP_ADA_USDT",
+      "state": "live",
+      "originalSymbol": "ADAUSDT"
+    },
+    {
+      "symbol": "XMRUSDT",
+      "ltp_sym": "BINANCE_PERP_XMR_USDT",
+      "state": "live",
+      "originalSymbol": "XMRUSDT"
+    },
+    {
+      "symbol": "LINKUSDT",
+      "ltp_sym": "BINANCE_PERP_LINK_USDT",
+      "state": "live",
+      "originalSymbol": "LINKUSDT"
+    },
+    {
+      "symbol": "CCUSDT",
+      "ltp_sym": "BINANCE_PERP_CC_USDT",
+      "state": "live",
+      "originalSymbol": "CCUSDT"
+    },
+    {
+      "symbol": "BCHUSDT",
+      "ltp_sym": "BINANCE_PERP_BCH_USDT",
+      "state": "live",
+      "originalSymbol": "BCHUSDT"
+    },
+    {
+      "symbol": "LTCUSDT",
+      "ltp_sym": "BINANCE_PERP_LTC_USDT",
+      "state": "live",
+      "originalSymbol": "LTCUSDT"
+    },
+    {
+      "symbol": "HBARUSDT",
+      "ltp_sym": "BINANCE_PERP_HBAR_USDT",
+      "state": "live",
+      "originalSymbol": "HBARUSDT"
+    },
+    {
+      "symbol": "SUIUSDT",
+      "ltp_sym": "BINANCE_PERP_SUI_USDT",
+      "state": "live",
+      "originalSymbol": "SUIUSDT"
+    },
+    {
+      "symbol": "LABUSDT",
+      "ltp_sym": "BINANCE_PERP_LAB_USDT",
+      "state": "live",
+      "originalSymbol": "LABUSDT"
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "ltp_sym": "BINANCE_PERP_AVAX_USDT",
+      "state": "live",
+      "originalSymbol": "AVAXUSDT"
+    },
+    {
+      "symbol": "XAUTUSDT",
+      "ltp_sym": "BINANCE_PERP_XAUT_USDT",
+      "state": "live",
+      "originalSymbol": "XAUTUSDT"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "ltp_sym": "BINANCE_PERP_NEAR_USDT",
+      "state": "live",
+      "originalSymbol": "NEARUSDT"
+    },
+    {
+      "symbol": "1000SHIBUSDT",
+      "ltp_sym": "BINANCE_PERP_1000SHIB_USDT",
+      "state": "live",
+      "originalSymbol": "1000SHIBUSDT"
+    },
+    {
+      "symbol": "MUSDT",
+      "ltp_sym": "BINANCE_PERP_M_USDT",
+      "state": "live",
+      "originalSymbol": "MUSDT"
+    },
+    {
+      "symbol": "TAOUSDT",
+      "ltp_sym": "BINANCE_PERP_TAO_USDT",
+      "state": "live",
+      "originalSymbol": "TAOUSDT"
+    },
+    {
+      "symbol": "UNIUSDT",
+      "ltp_sym": "BINANCE_PERP_UNI_USDT",
+      "state": "live",
+      "originalSymbol": "UNIUSDT"
+    },
+    {
+      "symbol": "PAXGUSDT",
+      "ltp_sym": "BINANCE_PERP_PAXG_USDT",
+      "state": "live",
+      "originalSymbol": "PAXGUSDT"
+    },
+    {
+      "symbol": "WLFIUSDT",
+      "ltp_sym": "BINANCE_PERP_WLFI_USDT",
+      "state": "live",
+      "originalSymbol": "WLFIUSDT"
+    },
+    {
+      "symbol": "ASTERUSDT",
+      "ltp_sym": "BINANCE_PERP_ASTER_USDT",
+      "state": "live",
+      "originalSymbol": "ASTERUSDT"
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "ltp_sym": "BINANCE_PERP_ONDO_USDT",
+      "state": "live",
+      "originalSymbol": "ONDOUSDT"
+    },
+    {
+      "symbol": "WLDUSDT",
+      "ltp_sym": "BINANCE_PERP_WLD_USDT",
+      "state": "live",
+      "originalSymbol": "WLDUSDT"
+    },
+    {
+      "symbol": "DOTUSDT",
+      "ltp_sym": "BINANCE_PERP_DOT_USDT",
+      "state": "live",
+      "originalSymbol": "DOTUSDT"
+    },
+    {
+      "symbol": "SKYUSDT",
+      "ltp_sym": "BINANCE_PERP_SKY_USDT",
+      "state": "live",
+      "originalSymbol": "SKYUSDT"
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "ltp_sym": "BINANCE_PERP_AAVE_USDT",
+      "state": "live",
+      "originalSymbol": "AAVEUSDT"
+    },
+    {
+      "symbol": "MORPHOUSDT",
+      "ltp_sym": "BINANCE_PERP_MORPHO_USDT",
+      "state": "live",
+      "originalSymbol": "MORPHOUSDT"
+    },
+    {
+      "symbol": "ICPUSDT",
+      "ltp_sym": "BINANCE_PERP_ICP_USDT",
+      "state": "live",
+      "originalSymbol": "ICPUSDT"
+    },
+    {
+      "symbol": "ETCUSDT",
+      "ltp_sym": "BINANCE_PERP_ETC_USDT",
+      "state": "live",
+      "originalSymbol": "ETCUSDT"
+    },
+    {
+      "symbol": "DEXEUSDT",
+      "ltp_sym": "BINANCE_PERP_DEXE_USDT",
+      "state": "live",
+      "originalSymbol": "DEXEUSDT"
+    },
+    {
+      "symbol": "1000PEPEUSDT",
+      "ltp_sym": "BINANCE_PERP_1000PEPE_USDT",
+      "state": "live",
+      "originalSymbol": "1000PEPEUSDT"
+    },
+    {
+      "symbol": "QNTUSDT",
+      "ltp_sym": "BINANCE_PERP_QNT_USDT",
+      "state": "live",
+      "originalSymbol": "QNTUSDT"
+    },
+    {
+      "symbol": "BEATUSDT",
+      "ltp_sym": "BINANCE_PERP_BEAT_USDT",
+      "state": "live",
+      "originalSymbol": "BEATUSDT"
+    },
+    {
+      "symbol": "KASUSDT",
+      "ltp_sym": "BINANCE_PERP_KAS_USDT",
+      "state": "live",
+      "originalSymbol": "KASUSDT"
+    },
+    {
+      "symbol": "STABLEUSDT",
+      "ltp_sym": "BINANCE_PERP_STABLE_USDT",
+      "state": "live",
+      "originalSymbol": "STABLEUSDT"
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "ltp_sym": "BINANCE_PERP_RENDER_USDT",
+      "state": "live",
+      "originalSymbol": "RENDERUSDT"
+    },
+    {
+      "symbol": "ATOMUSDT",
+      "ltp_sym": "BINANCE_PERP_ATOM_USDT",
+      "state": "live",
+      "originalSymbol": "ATOMUSDT"
+    },
+    {
+      "symbol": "JUPUSDT",
+      "ltp_sym": "BINANCE_PERP_JUP_USDT",
+      "state": "live",
+      "originalSymbol": "JUPUSDT"
+    },
+    {
+      "symbol": "POLUSDT",
+      "ltp_sym": "BINANCE_PERP_POL_USDT",
+      "state": "live",
+      "originalSymbol": "POLUSDT"
+    },
+    {
+      "symbol": "ALGOUSDT",
+      "ltp_sym": "BINANCE_PERP_ALGO_USDT",
+      "state": "live",
+      "originalSymbol": "ALGOUSDT"
+    },
+    {
+      "symbol": "JSTUSDT",
+      "ltp_sym": "BINANCE_PERP_JST_USDT",
+      "state": "live",
+      "originalSymbol": "JSTUSDT"
+    }
+  ],
+  "resolved_at_utc": "2026-07-18T13:55:18.595153+00:00",
+  "notes": [
+    "Replaces prior volume-ranked LTP\u2229Binance approximation (24/50 mismatch with official list).",
+    "Symbols listed under ltp_failures remain in symbols[] \u2014 not silently dropped."
+  ]
 }

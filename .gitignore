@@ -14,3 +14,4 @@ env/
 Thumbs.db
 debug_prompt_btcusdt.txt
 heartbeat.txt
+daily_equity_state.json

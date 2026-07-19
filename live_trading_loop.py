@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, ROUND_DOWN
 from pathlib import Path
+from typing import Any
 
 import requests
 import websockets
@@ -23,7 +24,9 @@ import websockets
 from ai_agent import get_regime_assessment
 from backtesting.backtest_funding_signal import FundingAsOf, FundingPoint
 from strategy import (
+    ACCOUNT_LEVERAGE_CAP,
     CIRCUIT_BREAKER,
+    EFFECTIVE_LEVERAGE,
     RISK_FRACTION,
     STOP_LOSS,
     TAKE_PROFIT,
@@ -46,10 +49,13 @@ SYMBOL_MAP = {
 LOOP_INTERVAL_S = int(os.environ.get("LIVE_LOOP_INTERVAL_S", "3600"))
 HEARTBEAT_PATH = Path("heartbeat.txt")
 OPEN_POSITIONS_PATH = Path("open_positions.json")
+DAILY_EQUITY_STATE_PATH = Path("daily_equity_state.json")
 # 30 days of hourly bars: enough for the AI regime vol percentile; signal uses the tail
 HISTORY_BARS = 720
 FUNDING_HISTORY_DAYS = 30
+# Exchange account leverage request (competition cap). Sizing uses EFFECTIVE_LEVERAGE.
 LEVERAGE = "2"
+DAILY_LOSS_LIMIT = 0.05  # pause new entries if equity < day-start * (1 - this)
 TERMINAL_ORDER_STATES = {"CANCELLED", "CANCELED", "REJECTED", "EXPIRED"}
 
 logger = logging.getLogger("live_loop")
@@ -89,6 +95,50 @@ def save_open_positions(ctx: Context) -> None:
         )
     except OSError as exc:
         logger.warning(f"Failed to write {OPEN_POSITIONS_PATH}: {exc}")
+
+
+def check_daily_loss_breaker(equity: float | None) -> tuple[bool, str]:
+    """
+    Rolling UTC-day loss breaker. True = halt new entries for the rest of the UTC day.
+    Resets at 00:00 UTC when a new calendar day is observed (day-start equity refreshed).
+    Independent of the equity-floor circuit breaker.
+    """
+    if equity is None:
+        return True, "daily-loss ACTIVE (equity unknown; fail closed)"
+
+    today = datetime.now(tz=timezone.utc).date().isoformat()
+    state: dict[str, Any] = {}
+    if DAILY_EQUITY_STATE_PATH.exists():
+        try:
+            raw = json.loads(DAILY_EQUITY_STATE_PATH.read_text(encoding="utf-8"))
+            if isinstance(raw, dict):
+                state = raw
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning(f"Could not read {DAILY_EQUITY_STATE_PATH}: {exc}")
+
+    if state.get("utc_date") != today:
+        state = {"utc_date": today, "day_start_equity": equity}
+        try:
+            DAILY_EQUITY_STATE_PATH.write_text(
+                json.dumps(state, indent=2) + "\n", encoding="utf-8"
+            )
+        except OSError as exc:
+            logger.warning(f"Failed to write {DAILY_EQUITY_STATE_PATH}: {exc}")
+        return False, (
+            f"daily-loss clear (new UTC day; day_start_equity={equity:.2f})"
+        )
+
+    day_start = float(state.get("day_start_equity", equity))
+    floor = day_start * (1.0 - DAILY_LOSS_LIMIT)
+    if equity < floor:
+        return True, (
+            f"daily-loss ACTIVE (equity {equity:.2f} < "
+            f"{floor:.2f} = {DAILY_LOSS_LIMIT:.0%} below day_start {day_start:.2f})"
+        )
+    return False, (
+        f"daily-loss clear (equity {equity:.2f} >= {floor:.2f}; "
+        f"day_start={day_start:.2f})"
+    )
 
 
 def verify_open_positions_against_api(ctx: Context) -> None:
@@ -349,7 +399,9 @@ def place_entry_order(ctx: Context, binance_sym: str, equity: float) -> None:
         logger.info(
             f"{binance_sym}: PLACED LIMIT BUY qty={fmt_dec(qty_dec)} @ {fmt_dec(limit_price)} "
             f"tp={fmt_dec(tp_trigger)} sl={fmt_dec(sl_trigger)} orderId={order_id} "
-            f"(risk={notional * STOP_LOSS:.2f} USDT = {RISK_FRACTION:.0%} of equity)"
+            f"(notional={notional:.2f} USDT; stop-risk≈{notional * STOP_LOSS:.2f} USDT; "
+            f"effective_leverage={EFFECTIVE_LEVERAGE}x vs account_cap={ACCOUNT_LEVERAGE_CAP}x; "
+            f"base_risk_frac={RISK_FRACTION:.0%})"
         )
     else:
         logger.error(f"{binance_sym}: order rejected: code={code} message={payload.get('message')}")
@@ -359,17 +411,25 @@ def run_iteration(ctx: Context) -> None:
     now = datetime.now(tz=timezone.utc).isoformat()
     logger.info(f"--- iteration start {now} ---")
     try:
-        # (a) Circuit breaker first, every loop, no exceptions
+        # (a) Both breakers every loop — either one blocks all new entries
         equity = fetch_equity(ctx)
-        breaker_on = True if equity is None else check_circuit_breaker(equity)
+        floor_on = True if equity is None else check_circuit_breaker(equity)
+        daily_on, daily_msg = check_daily_loss_breaker(equity)
         equity_text = f"{equity:.2f}" if equity is not None else "UNKNOWN"
         logger.info(
-            f"equity={equity_text} USDT | breaker={'ACTIVE' if breaker_on else 'clear'} "
-            f"(floor {CIRCUIT_BREAKER:.0f})"
+            f"equity={equity_text} USDT | equity-floor breaker="
+            f"{'ACTIVE' if floor_on else 'clear'} (floor {CIRCUIT_BREAKER:.0f}) | "
+            f"{daily_msg}"
         )
 
-        if breaker_on:
-            logger.info("CIRCUIT BREAKER ACTIVE - no new entries")
+        if floor_on or daily_on:
+            if floor_on:
+                logger.info(
+                    "BLOCKED: equity-floor circuit breaker ACTIVE - no new entries "
+                    f"(floor {CIRCUIT_BREAKER:.0f} USDT)"
+                )
+            if daily_on:
+                logger.info(f"BLOCKED: {daily_msg} - no new entries until next UTC day")
         else:
             # (b) AI regime gate then signal check, once per symbol per iteration
             for binance_sym in SYMBOL_MAP:

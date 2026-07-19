@@ -1,0 +1,31 @@
+name: Test RapidX CLI Klines
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-klines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install RapidX CLI
+        run: npm install -g @liquiditytech/rapidx-cli@latest
+
+      - name: Verify CLI
+        run: rapidx --version
+
+      - name: Fetch klines via RapidX CLI
+        env:
+          LTP_ACCESS_KEY: ${{ secrets.LTP_ACCESS_KEY }}
+          LTP_SECRET_KEY: ${{ secrets.LTP_SECRET_KEY }}
+          LTP_API_HOST: ${{ secrets.LTP_API_HOST }}
+        run: >
+          rapidx market get-klines
+          --input '{"symbol":"BINANCE_PERP_BTC_USDT","interval":"1h","limit":10}'
+          --json

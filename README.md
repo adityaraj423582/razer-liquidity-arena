@@ -31,7 +31,7 @@ We stress-tested **seven** signal families on multi-symbol walk-forward data. No
 |-----------|----------------|
 | Rare entries | Cascade dump + funding filter (~few signals per months of history) |
 | Hard risk | 1% equity risk per trade · TP +0.5% · SL −1.5% |
-| Kill switch | Circuit breaker at **900 USDT** (start 1000) |
+| Kill switch | Circuit breaker at **950 USDT** (start 1000); plus 5% UTC daily-loss pause |
 | Regime gate | AI `NORMAL` / `PAUSE` before any new entry |
 | Fail closed | API / AI failures → **PAUSE** or skip — never force a trade |
 
@@ -198,9 +198,10 @@ Add repository secrets matching `.env.example`, then use **Actions → Trading L
 
 ```
 Equity start ........ 1000 USDT (demo / sandbox)
-Circuit breaker ..... 900 USDT  → no new entries
+Circuit breaker ..... 950 USDT  → no new entries
+Daily loss pause .... 5% below UTC day-start equity → no new entries until next UTC day
 Disqualification .... 800 USDT  → competition floor (reference)
-Risk per trade ...... 1% of equity at stop distance
+Risk per trade ...... 1% base risk, sized at EFFECTIVE_LEVERAGE 1.5x (account cap 2x)
 AI / API failure .... PAUSE / skip — never fail open to NORMAL
 ```
 

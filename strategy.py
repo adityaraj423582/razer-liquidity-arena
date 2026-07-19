@@ -26,8 +26,13 @@ TAKE_PROFIT = 0.005
 STOP_LOSS = 0.015
 RISK_FRACTION = 0.01
 STARTING_EQUITY = 1000.0
-CIRCUIT_BREAKER = 900.0
+# Internal stop-new-entries floor (more buffer than competition DQ at 800)
+CIRCUIT_BREAKER = 950.0
 DISQUALIFICATION_FLOOR = 800.0
+# Account leverage requested from the exchange (API) stays at the 2x cap.
+ACCOUNT_LEVERAGE_CAP = 2.0
+# Position sizing uses this lower effective leverage (more conservative than the cap).
+EFFECTIVE_LEVERAGE = 1.5
 FEE_RATE = 0.0005
 MAX_POSITIONS = 2
 
@@ -92,17 +97,29 @@ def check_entry_signal(
 
 
 def calculate_position_size(equity: float, entry_price: float) -> tuple[float, float]:
-    # Risk 1% of equity at STOP_LOSS distance
+    """
+    Risk 1% of equity at STOP_LOSS distance, then scale by EFFECTIVE_LEVERAGE /
+    ACCOUNT_LEVERAGE_CAP so sizing is more conservative than the 2x exchange cap.
+
+    Example at equity=1000, STOP_LOSS=1.5%, RISK=1%, EFFECTIVE=1.5, CAP=2.0:
+      raw_notional = 1000 * 0.01 / 0.015 = 666.67
+      notional     = 666.67 * (1.5 / 2.0) = 500.00
+      qty          = 500 / entry_price
+    Hard ceiling: notional <= equity * EFFECTIVE_LEVERAGE.
+    """
     if equity <= 0 or entry_price <= 0:
         return 0.0, 0.0
     risk_usdt = equity * RISK_FRACTION
     notional = risk_usdt / STOP_LOSS
+    if ACCOUNT_LEVERAGE_CAP > 0:
+        notional *= EFFECTIVE_LEVERAGE / ACCOUNT_LEVERAGE_CAP
+    notional = min(notional, equity * EFFECTIVE_LEVERAGE)
     qty = notional / entry_price
     return notional, qty
 
 
 def check_circuit_breaker(equity: float) -> bool:
-    # True = halt new entries
+    # True = halt new entries (equity-floor breaker)
     return equity < CIRCUIT_BREAKER
 
 
@@ -260,12 +277,16 @@ def simulate() -> tuple[list[Trade], list[float], dict[str, float]]:
 
 
 def run_unit_checks() -> int:
-    assert check_circuit_breaker(899.99) is True
-    assert check_circuit_breaker(900.0) is False
+    assert check_circuit_breaker(949.99) is True
+    assert check_circuit_breaker(950.0) is False
+    assert check_circuit_breaker(900.0) is True  # still below new floor
 
     notional, qty = calculate_position_size(1000.0, 50000.0)
-    assert abs(notional - (1000.0 * RISK_FRACTION / STOP_LOSS)) < 1e-9
-    assert abs((notional * STOP_LOSS) / 1000.0 - RISK_FRACTION) < 1e-12
+    raw = 1000.0 * RISK_FRACTION / STOP_LOSS
+    expected = raw * (EFFECTIVE_LEVERAGE / ACCOUNT_LEVERAGE_CAP)
+    expected = min(expected, 1000.0 * EFFECTIVE_LEVERAGE)
+    assert abs(notional - expected) < 1e-9
+    assert abs(qty - expected / 50000.0) < 1e-12
 
     # Synthetic cascade bar then entry bar; funding forced extreme-negative
     class _FakeFunding:

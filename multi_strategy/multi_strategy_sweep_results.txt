@@ -190,3 +190,84 @@ FAIL | strat_15m  | strategy.py cascade+funding x50 @15m (drop=4%/bar vol=2x/96b
 Verdict: FAIL
 
 Results written to C:\Users\Aditya Raj Singh\OneDrive\Desktop\LIQUITY TRADINGH\multi_strategy_sweep_results.txt
+
+========================================================================
+=== ADDON: BTC->altcoin lead-lag (final new hypothesis this cycle) ===
+Hypothesis: BTC trailing 1-3h return predicts next 1h same-direction move in BTC-correlated alts.
+Universe: official competition_universe.json 50-list (49 symbols with >= 4000 hourly bars used).
+Corr ranking: Period A only, positive Pearson of hourly returns vs BTC; top_k in {5,8,10}.
+Signal: if |BTC ret over prior lag hours| >= thresh -> same-direction 1h trade in each selected alt (risk=1% / stop-proxy=thresh, fee=0.0005).
+Tune on A only (max A Sharpe). Pass bar: return>0 AND Sharpe>0 on BOTH B and C.
+Period A: 2026-01-17T16:00:00+00:00 -> 2026-03-18T16:00:00+00:00 | B: 2026-03-18T16:00:00+00:00 -> 2026-05-17T16:00:00+00:00 | C: 2026-05-17T16:00:00+00:00 -> 2026-07-16T16:00:00+00:00
+Period-A BTC correlation leaders (positive):
+  #1 ETHUSDT corr_A=0.9007
+  #2 LINKUSDT corr_A=0.8738
+  #3 BNBUSDT corr_A=0.8689
+  #4 SOLUSDT corr_A=0.8629
+  #5 AVAXUSDT corr_A=0.8347
+  #6 SUIUSDT corr_A=0.8263
+  #7 ONDOUSDT corr_A=0.8184
+  #8 ADAUSDT corr_A=0.8175
+  #9 LTCUSDT corr_A=0.8144
+  #10 ETCUSDT corr_A=0.7980
+
+--- All combos (45) ---
+FAIL | btc_lead | btcLead lag=1h thr=0.3% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -5.31 ret=-100.00% trades=3495 dd=100.00% | B: sharpe= -5.21 ret= -99.49% trades=2215 dd= 99.62% | C: sharpe= -7.32 ret= -99.99% trades=2545 dd=100.00%
+FAIL | btc_lead | btcLead lag=1h thr=0.3% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -8.86 ret=-100.00% trades=1208 dd=100.00% | B: sharpe= -4.14 ret= -99.99% trades=3544 dd= 99.99% | C: sharpe= -8.27 ret=-100.00% trades=4072 dd=100.00%
+FAIL | btc_lead | btcLead lag=1h thr=0.3% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -8.84 ret=-100.00% trades=1507 dd=100.00% | B: sharpe= -5.01 ret=-100.00% trades=4430 dd=100.00% | C: sharpe= -8.45 ret=-100.00% trades=5090 dd=100.00%
+FAIL | btc_lead | btcLead lag=1h thr=0.5% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -3.37 ret= -99.86% trades=2010 dd= 99.94% | B: sharpe= -3.13 ret= -89.51% trades= 995 dd= 93.22% | C: sharpe= -5.28 ret= -99.60% trades=1300 dd= 99.70%
+FAIL | btc_lead | btcLead lag=1h thr=0.5% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -4.68 ret=-100.18% trades= 616 dd=100.10% | B: sharpe= -2.53 ret= -98.48% trades=1592 dd= 99.40% | C: sharpe= -6.38 ret=-100.00% trades=2080 dd=100.00%
+FAIL | btc_lead | btcLead lag=1h thr=0.5% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -5.21 ret=-100.07% trades= 768 dd=100.04% | B: sharpe= -3.34 ret= -99.83% trades=1990 dd= 99.94% | C: sharpe= -6.61 ret=-100.00% trades=2600 dd=100.00%
+FAIL | btc_lead | btcLead lag=1h thr=0.8% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -2.82 ret= -86.27% trades= 960 dd= 90.50% | B: sharpe= -1.05 ret= -31.98% trades= 360 dd= 53.51% | C: sharpe= -3.84 ret= -78.59% trades= 530 dd= 82.21%
+FAIL | btc_lead | btcLead lag=1h thr=0.8% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -3.07 ret= -98.91% trades=1536 dd= 99.49% | B: sharpe= -1.09 ret= -55.50% trades= 576 dd= 73.76% | C: sharpe= -4.59 ret= -97.60% trades= 848 dd= 98.36%
+FAIL | btc_lead | btcLead lag=1h thr=0.8% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -3.73 ret= -99.92% trades=1918 dd= 99.96% | B: sharpe= -1.78 ret= -74.52% trades= 720 dd= 82.92% | C: sharpe= -4.77 ret= -99.33% trades=1060 dd= 99.57%
+FAIL | btc_lead | btcLead lag=1h thr=1.0% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -2.44 ret= -69.99% trades= 645 dd= 83.55% | B: sharpe= -2.63 ret= -29.82% trades= 200 dd= 37.47% | C: sharpe= -4.57 ret= -69.07% trades= 325 dd= 72.49%
+FAIL | btc_lead | btcLead lag=1h thr=1.0% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -2.97 ret= -94.02% trades=1032 dd= 98.01% | B: sharpe= -2.90 ret= -48.12% trades= 320 dd= 56.22% | C: sharpe= -5.11 ret= -92.64% trades= 520 dd= 93.54%
+FAIL | btc_lead | btcLead lag=1h thr=1.0% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -3.62 ret= -98.66% trades=1288 dd= 99.59% | B: sharpe= -3.78 ret= -62.40% trades= 400 dd= 68.91% | C: sharpe= -5.24 ret= -96.74% trades= 650 dd= 97.21%
+FAIL | btc_lead | btcLead lag=1h thr=1.5% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -0.92 ret= -21.50% trades= 195 dd= 43.02% | B: sharpe=  0.57 ret=  +1.85% trades=  70 dd=  8.47% | C: sharpe= -2.95 ret= -26.04% trades= 135 dd= 34.34%
+FAIL | btc_lead | btcLead lag=1h thr=1.5% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -1.27 ret= -45.83% trades= 312 dd= 66.36% | B: sharpe=  0.58 ret=  +2.46% trades= 112 dd= 11.53% | C: sharpe= -2.85 ret= -43.59% trades= 216 dd= 52.98%
+FAIL | btc_lead | btcLead lag=1h thr=1.5% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -1.50 ret= -59.68% trades= 389 dd= 76.07% | B: sharpe=  0.35 ret=  +0.89% trades= 140 dd= 14.23% | C: sharpe= -2.95 ret= -52.58% trades= 270 dd= 61.95%
+FAIL | btc_lead | btcLead lag=2h thr=0.3% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -1.87 ret=-100.00% trades=4180 dd=100.00% | B: sharpe= -5.00 ret= -99.94% trades=3365 dd= 99.96% | C: sharpe= -6.56 ret=-100.00% trades=3525 dd=100.00%
+FAIL | btc_lead | btcLead lag=2h thr=0.3% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -2.95 ret=-100.01% trades=1560 dd=100.00% | B: sharpe= -3.73 ret=-100.00% trades=5384 dd=100.00% | C: sharpe= -6.32 ret=-100.00% trades=5640 dd=100.00%
+FAIL | btc_lead | btcLead lag=2h thr=0.3% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -3.36 ret=-100.00% trades=1945 dd=100.00% | B: sharpe= -4.35 ret=-100.00% trades=6730 dd=100.00% | C: sharpe= -6.14 ret=-100.00% trades=7050 dd=100.00%
+FAIL | btc_lead | btcLead lag=2h thr=0.5% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -0.94 ret= -99.92% trades=2920 dd= 99.97% | B: sharpe= -4.30 ret= -99.31% trades=1840 dd= 99.39% | C: sharpe= -4.43 ret= -99.98% trades=2120 dd= 99.99%
+FAIL | btc_lead | btcLead lag=2h thr=0.5% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -4.57 ret=-100.01% trades=1048 dd=100.01% | B: sharpe= -3.73 ret= -99.99% trades=2944 dd= 99.99% | C: sharpe= -3.92 ret=-100.00% trades=3392 dd=100.00%
+FAIL | btc_lead | btcLead lag=2h thr=0.5% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -4.79 ret=-100.00% trades=1306 dd=100.00% | B: sharpe= -4.43 ret=-100.00% trades=3680 dd=100.00% | C: sharpe= -3.63 ret=-100.00% trades=4240 dd=100.00%
+FAIL | btc_lead | btcLead lag=2h thr=0.8% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe=  0.03 ret= -79.18% trades=1695 dd= 92.19% | B: sharpe= -1.41 ret= -61.19% trades= 825 dd= 75.00% | C: sharpe= -4.67 ret= -95.81% trades=1075 dd= 96.23%
+FAIL | btc_lead | btcLead lag=2h thr=0.8% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -0.02 ret= -99.16% trades=2712 dd= 99.68% | B: sharpe= -1.41 ret= -86.74% trades=1320 dd= 92.01% | C: sharpe= -5.29 ret= -99.94% trades=1720 dd= 99.95%
+FAIL | btc_lead | btcLead lag=2h thr=0.8% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -0.08 ret= -99.95% trades=3387 dd= 99.99% | B: sharpe= -2.03 ret= -95.68% trades=1650 dd= 96.55% | C: sharpe= -5.21 ret= -99.99% trades=2150 dd= 99.99%
+FAIL | btc_lead | btcLead lag=2h thr=1.0% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe=  0.24 ret= -49.59% trades=1215 dd= 80.13% | B: sharpe=  0.27 ret=  -9.77% trades= 505 dd= 45.37% | C: sharpe= -5.19 ret= -87.06% trades= 705 dd= 89.63%
+FAIL | btc_lead | btcLead lag=2h thr=1.0% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe=  0.30 ret= -88.09% trades=1944 dd= 97.19% | B: sharpe=  0.15 ret= -32.78% trades= 808 dd= 65.70% | C: sharpe= -5.78 ret= -98.94% trades=1128 dd= 99.05%
+FAIL | btc_lead | btcLead lag=2h thr=1.0% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe=  0.16 ret= -97.07% trades=2427 dd= 99.38% | B: sharpe= -0.34 ret= -56.21% trades=1010 dd= 75.96% | C: sharpe= -5.78 ret= -99.70% trades=1410 dd= 99.74%
+FAIL | btc_lead | btcLead lag=2h thr=1.5% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -1.52 ret= -43.89% trades= 595 dd= 55.40% | B: sharpe= -1.81 ret= -15.16% trades= 210 dd= 22.14% | C: sharpe= -2.91 ret= -45.36% trades= 280 dd= 57.35%
+FAIL | btc_lead | btcLead lag=2h thr=1.5% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -1.41 ret= -69.30% trades= 952 dd= 81.44% | B: sharpe= -1.53 ret= -21.23% trades= 336 dd= 34.80% | C: sharpe= -3.07 ret= -71.33% trades= 448 dd= 77.86%
+FAIL | btc_lead | btcLead lag=2h thr=1.5% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -1.74 ret= -83.40% trades=1188 dd= 90.10% | B: sharpe= -2.17 ret= -32.81% trades= 420 dd= 44.55% | C: sharpe= -3.04 ret= -79.75% trades= 560 dd= 85.16%
+FAIL | btc_lead | btcLead lag=3h thr=0.3% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -1.88 ret=-100.00% trades=4700 dd=100.00% | B: sharpe= -4.23 ret= -99.97% trades=3755 dd= 99.97% | C: sharpe= -8.13 ret=-100.00% trades=4060 dd=100.00%
+FAIL | btc_lead | btcLead lag=3h thr=0.3% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -2.84 ret=-100.00% trades=1808 dd=100.00% | B: sharpe= -2.91 ret=-100.00% trades=6008 dd=100.00% | C: sharpe= -7.43 ret=-100.00% trades=6496 dd=100.00%
+FAIL | btc_lead | btcLead lag=3h thr=0.3% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -3.11 ret=-100.00% trades=2252 dd=100.00% | B: sharpe= -3.36 ret=-100.00% trades=7510 dd=100.00% | C: sharpe= -7.17 ret=-100.00% trades=8120 dd=100.00%
+FAIL | btc_lead | btcLead lag=3h thr=0.5% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -0.59 ret= -99.98% trades=3570 dd= 99.99% | B: sharpe= -3.53 ret= -99.63% trades=2490 dd= 99.69% | C: sharpe= -6.47 ret=-100.00% trades=2700 dd=100.00%
+FAIL | btc_lead | btcLead lag=3h thr=0.5% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -5.16 ret=-100.00% trades=1232 dd=100.00% | B: sharpe= -2.75 ret=-100.00% trades=3984 dd=100.00% | C: sharpe= -5.70 ret=-100.00% trades=4320 dd=100.00%
+FAIL | btc_lead | btcLead lag=3h thr=0.5% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -5.07 ret=-100.00% trades=1535 dd=100.00% | B: sharpe= -3.23 ret=-100.00% trades=4980 dd=100.00% | C: sharpe= -5.22 ret=-100.00% trades=5400 dd=100.00%
+FAIL | btc_lead | btcLead lag=3h thr=0.8% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -1.00 ret= -95.07% trades=2280 dd= 97.19% | B: sharpe= -1.78 ret= -74.25% trades=1230 dd= 78.57% | C: sharpe= -9.02 ret= -99.85% trades=1560 dd= 99.86%
+FAIL | btc_lead | btcLead lag=3h thr=0.8% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -0.81 ret= -99.95% trades=3648 dd= 99.98% | B: sharpe= -1.41 ret= -92.64% trades=1968 dd= 93.90% | C: sharpe= -9.00 ret=-100.00% trades=2496 dd=100.00%
+FAIL | btc_lead | btcLead lag=3h thr=0.8% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -0.59 ret=-100.00% trades=4556 dd=100.00% | B: sharpe= -1.98 ret= -98.13% trades=2460 dd= 98.50% | C: sharpe= -8.93 ret=-100.00% trades=3120 dd=100.00%
+FAIL | btc_lead | btcLead lag=3h thr=1.0% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe= -1.35 ret= -86.46% trades=1695 dd= 91.16% | B: sharpe=  0.81 ret=  -0.82% trades= 805 dd= 43.41% | C: sharpe= -8.21 ret= -97.68% trades=1040 dd= 97.72%
+FAIL | btc_lead | btcLead lag=3h thr=1.0% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe= -1.25 ret= -99.09% trades=2712 dd= 99.54% | B: sharpe=  1.07 ret= -12.24% trades=1288 dd= 59.40% | C: sharpe= -8.41 ret= -99.95% trades=1664 dd= 99.95%
+FAIL | btc_lead | btcLead lag=3h thr=1.0% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe= -1.05 ret= -99.86% trades=3386 dd= 99.94% | B: sharpe=  0.48 ret= -46.58% trades=1610 dd= 72.12% | C: sharpe= -8.40 ret= -99.99% trades=2080 dd= 99.99%
+FAIL | btc_lead | btcLead lag=3h thr=1.5% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX        | A: sharpe=  0.91 ret=  -2.60% trades= 895 dd= 49.12% | B: sharpe= -2.46 ret= -27.15% trades= 335 dd= 31.60% | C: sharpe= -6.22 ret= -74.10% trades= 455 dd= 75.86%
+FAIL | btc_lead | btcLead lag=3h thr=1.5% top8 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,ON | A: sharpe=  0.89 ret= -35.62% trades=1432 dd= 74.76% | B: sharpe= -1.92 ret= -36.45% trades= 536 dd= 44.93% | C: sharpe= -6.78 ret= -94.06% trades= 728 dd= 94.36%
+FAIL | btc_lead | btcLead lag=3h thr=1.5% top10 hold=1h alts=ETH,LINK,BNB,SOL,AVAX,SUI,O | A: sharpe=  0.82 ret= -57.56% trades=1787 dd= 83.58% | B: sharpe= -2.54 ret= -50.52% trades= 670 dd= 55.08% | C: sharpe= -6.85 ret= -97.00% trades= 910 dd= 97.20%
+
+--- Best on Period A (tuning reference; NOT a pass criterion) ---
+FAIL | A-best | btcLead lag=3h thr=1.5% top5 hold=1h alts=ETH,LINK,BNB,SOL,AVAX
+  A: sharpe=  0.91 ret=  -2.60% trades= 895 dd= 49.12%
+  B: sharpe= -2.46 ret= -27.15% trades= 335 dd= 31.60%
+  C: sharpe= -6.22 ret= -74.10% trades= 455 dd= 75.86%
+  => A-best B+C outcome: FAIL
+
+Combos with return>0 AND Sharpe>0 on B AND C: 0/45
+
+BLUNT VERDICT:
+- BTC->alt lead-lag: FAIL. No combo clears return>0 AND Sharpe>0 on both B and C after A-only correlation ranking + A-only param tune.
+- Final stance for this competition cycle: stop searching; keep the existing capital-preservation cascade+funding live design - no further strategy changes before July 20.
+========================================================================

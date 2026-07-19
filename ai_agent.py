@@ -282,7 +282,11 @@ def _build_regime_prompt(
         f"round, or describe magnitudes in your own words (e.g. do not say '~3% drop' or "
         f"'elevated' — cite the exact provided numbers or ratios instead).\n"
         f"- If your stated reason contains any number, it must match a number given to you "
-        f"in this prompt exactly.\n\n"
+        f"in this prompt exactly.\n"
+        f"- Weight PAUSE more heavily when there are signs of abnormal cross-market "
+        f"conditions (e.g. unusually high volume consistent with simultaneous stress "
+        f"across multiple symbols, not ordinary single-name noise). Prefer PAUSE over "
+        f"NORMAL in those cases even if funding alone looks calm.\n\n"
         f'Respond with ONLY a JSON object, no other text: '
         f'{{"decision": "NORMAL" or "PAUSE", "reason": "<one concise sentence>"}}'
     )

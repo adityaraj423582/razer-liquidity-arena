@@ -1,9 +1,10 @@
 name: Trading Loop
 
 on:
-  schedule:
-    # Every hour at minute 0 UTC
-    - cron: "0 * * * *"
+  # Paused while RAZERDEMO is suspended / MainPortfolio not funded.
+  # Re-enable hourly runs when live capital is ready:
+  # schedule:
+  #   - cron: "0 * * * *"
   workflow_dispatch:
 
 jobs:
